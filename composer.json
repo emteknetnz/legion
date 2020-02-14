@@ -11,7 +11,7 @@
     },
     "autoload": {
         "files": [
-            "environment.php"
+            "env.php"
         ]
     },
     "config": {
