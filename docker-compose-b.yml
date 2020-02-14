@@ -1,0 +1,38 @@
+version: "3"
+
+services:
+  webserver:
+    build: 
+      context: ./dockerfiles/webserver
+    restart: 'always'
+    # ports:
+    #   # TODO: either remove the port, or increment it
+    #   # you could increment by cp this file with a new name
+    #   # then use the new file to docker-compose up, later rm it
+    #  - "1081:80"
+    links: 
+      - database
+    volumes: 
+      # These are shared from Host to B, not from A to B
+      # I don't beleive it's because of docker.sock, I think it's just how things are
+      - ./../../../:/var/www/html
+      - ./volumes/vhosts:/etc/apache2/sites-enabled
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp:/tmp
+    command: 
+      - ./commands/script-b.sh
+  database:  
+    build: ./dockerfiles/database
+    restart: 'always'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+
+# start container
+# docker-compose -f docker-compose-b.yml up
+# docker-compose -f docker-compose-b.yml up && docker-compose rm -f
+
+# ssh in to webserver
+# docker exec -it $(docker ps | grep _webserver | sed -n -r 's/^([^ ]+).+$/\1/p') bash
+
+# connect to mysql from websever
+# mysql -uroot -proot -h database

@@ -1,0 +1,38 @@
+version: "3"
+
+services:
+  webserver:
+    build: 
+      context: ./dockerfiles/webserver
+    restart: 'always'
+    ports:
+     - "1080:80"
+#     - "1443:443"
+    links: 
+      - database
+    volumes: 
+      - ../../../:/var/www/html
+      - ./volumes/vhosts:/etc/apache2/sites-enabled
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp:/tmp
+    command: 
+      - ./commands/script-a.sh
+  database:  
+    build: ./dockerfiles/database
+    restart: 'always'
+#    ports:
+#      - "13306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+
+# start container
+# docker-compose -f docker-compose-a.yml up
+# docker-compose -f docker-compose-a.yml up && docker-compose rm -f
+
+# ssh in to webserver
+# docker exec -it $(docker ps | grep _webserver | sed -n -r 's/^([^ ]+).+$/\1/p') bash
+
+# connect to mysql from websever
+# mysql -uroot -proot -h database
+
+# TODO: once this thing is stable, save it as an image and host on docker hub
