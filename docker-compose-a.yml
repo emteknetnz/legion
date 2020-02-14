@@ -28,6 +28,9 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
 
+# remove existing image so it gets rebuilt
+# docker image rm legion_a_webserver
+
 # start container
 # docker-compose -f vendor/emteknetnz/legion/docker-compose-a.yml up
 # docker-compose -f docker-compose-a.yml up
@@ -35,7 +38,7 @@ services:
 # docker-compose -f $(pwd)/vendor/emteknetnz/legion/docker-compose-a.yml up
 
 # ssh in to webserver
-# docker exec -it $(docker ps | grep _webserver | sed -n -r 's/^([^ ]+).+$/\1/p') bash
+# docker exec -it $(docker ps | grep legion_a_webserver | sed -n -r 's/^([^ ]+).+$/\1/p') bash
 
 # connect to mysql from websever
 # mysql -uroot -proot -h database

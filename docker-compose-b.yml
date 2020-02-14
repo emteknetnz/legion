@@ -38,7 +38,7 @@ services:
 # docker-compose -f docker-compose-b.yml up && docker-compose -f docker-compose-b.yml rm 
 
 # ssh in to webserver
-# docker exec -it $(docker ps | grep _webserver | sed -n -r 's/^([^ ]+).+$/\1/p') bash
+# docker exec -it $(docker ps | grep legion_b_webserver | sed -n -r 's/^([^ ]+).+$/\1/p') bash
 
 # connect to mysql from websever
 # mysql -uroot -proot -h database
