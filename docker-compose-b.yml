@@ -4,6 +4,7 @@ services:
   webserver:
     build: 
       context: ./dockerfiles/webserver
+    container_name: 'legion_b_webserver'
     restart: 'always'
     # ports:
     #   # TODO: either remove the port, or increment it
@@ -20,16 +21,21 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp:/tmp
     command: 
-      - ./commands/script-b.sh
+      # this will be run by sh with a pwd of /var/www/html
+      - vendor/emteknetnz/legion/commands/script-b.sh
   database:  
     build: ./dockerfiles/database
+    container_name: 'legion_b_database'
     restart: 'always'
     environment:
       MYSQL_ROOT_PASSWORD: root
 
+# run unit test in container
+
 # start container
+# docker-compose -f vendor/emteknetnz/legion/docker-compose-b.yml up
 # docker-compose -f docker-compose-b.yml up
-# docker-compose -f docker-compose-b.yml up && docker-compose rm -f
+# docker-compose -f docker-compose-b.yml up && docker-compose -f docker-compose-b.yml rm 
 
 # ssh in to webserver
 # docker exec -it $(docker ps | grep _webserver | sed -n -r 's/^([^ ]+).+$/\1/p') bash

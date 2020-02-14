@@ -5,6 +5,9 @@ echo "Handling shared folder permission"
 groupadd -g 998 myvboxsf
 usermod -aG myvboxsf www-data
 
+
+# TODO: move this stuff to webserver dockerfile
+
 # install docker
 # TODO: possibly if [ which docker > /dev/null ] to see if need to install to allow me to reboot containers
 apt update
