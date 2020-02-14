@@ -1,0 +1,22 @@
+{
+    "name": "emteknetnz/legion",
+    "type": "library",
+    "description": "Parallel silverstripe testing using docker",
+    "require": {
+        "php": ">=7.1.0",
+        "silverstripe/framework": "^4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7"
+    },
+    "autoload": {
+        "files": [
+            "environment.php"
+        ]
+    },
+    "config": {
+        "process-timeout": 600
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
+}
