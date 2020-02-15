@@ -1,7 +1,7 @@
 version: "3"
 
 services:
-  webserver:
+  webserver_b:
     build: 
       context: ./dockerfiles/webserver
     container_name: 'legion_b_webserver'
@@ -12,7 +12,7 @@ services:
     #   # then use the new file to docker-compose up, later rm it
     #  - "1081:80"
     links: 
-      - database
+      - database_b
     volumes: 
       # These are shared from Host to B, not from A to B
       # I don't beleive it's because of docker.sock, I think it's just how things are
@@ -23,7 +23,7 @@ services:
     command: 
       # this will be run by sh with a pwd of /var/www/html
       - vendor/emteknetnz/legion/commands/script-b.sh
-  database:  
+  database_b:  
     build: ./dockerfiles/database
     container_name: 'legion_b_database'
     restart: 'no'

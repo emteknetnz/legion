@@ -33,9 +33,6 @@ services:
 
 # start container
 # docker-compose -f vendor/emteknetnz/legion/docker-compose-a.yml up
-# docker-compose -f docker-compose-a.yml up
-# docker-compose -f docker-compose-a.yml up && docker-compose -f docker-compose-a.yml rm 
-# docker-compose -f $(pwd)/vendor/emteknetnz/legion/docker-compose-a.yml up
 
 # ssh in to webserver
 # docker exec -it $(docker ps | grep legion_a_webserver | sed -n -r 's/^([^ ]+).+$/\1/p') bash

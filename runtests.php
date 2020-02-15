@@ -22,14 +22,24 @@ preg_match_all('%function (test[^\( ]*)%', $s, $m);
 $funcnames = $m[1];
 foreach ($funcnames as $funcname) {
     echo "Creating container for $funcname\n";
-    //shell_exec("docker run --name myphpunit-$funcname --rm -d -v $(pwd):/a php:cli bash -c '/a/vendor/bin/phpunit --filter=$funcname /a/unittests.php > /a/phpunitlogs/$funcname.txt 2>&1'");
 
-    // TODO try:
-    // -- docker-compose run --no-deps (will need this plug test into a database)
-    // -- docker-compose exec
+    // this will spin up a new webserver_b that will be removed after phpunit
+    // is run from inside of it
+
+    // --no-deps
+    // - will use the existing legion_a_database (instead of legion_b_database)
+    // - doesn't show any warnings
+    // - best performance for spinning up database containers
+    // - shoudl be fine for silverstripe phpunit since it will create tmp databases
+
+    // (omit --no-deps)
+    // - Initially will say Creating legion_b_database legion_b_database
+    // - The next test will then say 'Starting legion_b_database, though I think using the one currently being used by the first test
+    // - Will show anooying message WARNING: Found orphan containers (legion_a_webserver, legion_a_database) for this project
+    // - Slower performance
 
     // the following will run inside container A with a pwd of /var/www/html
-    shell_exec("docker-compose -f $moduledir/docker-compose-b.yml run --name myphpunit-$funcname -d webserver bash -c 'vendor/bin/phpunit --filter=$funcname $unittestdir > $logdir/$funcname.txt 2>&1'");
+    shell_exec("docker-compose -f $moduledir/docker-compose-b.yml run --name myphpunit-$funcname -d --no-deps webserver_b bash -c 'vendor/bin/phpunit --filter=$funcname $unittestdir > $logdir/$funcname.txt 2>&1'");
 }
 
 for ($i = 0; $i < 10; $i++) {
@@ -56,7 +66,7 @@ foreach (scandir($logdir) as $filename) {
     echo "\nParsing $filename\n";
     $s = file_get_contents("$logdir/$filename");
     $s = preg_replace('%PHPUnit .+? by Sebastian Bergmann[^\n]*%', '', $s);
-    echo $s;
+    //echo $s;
 }
 
 $executiontime = round(microtime(true) - $timestart, 2);
