@@ -1,9 +1,7 @@
 <?php
 
-// docker will use SERVER_ADDR 172.23.0.3
-// ubuntu vm host will use 127.0.0.1
-// TODO: better way to identify this is a docker-a server
-if (!in_array($_SERVER['SERVER_ADDR'], ['127.0.0.1', 'localhost'])) {
+// check for existance of identifier fileset in script-a.sh or script-b.sh 
+if (file_exists('/home/is_legion_docker.txt')) {
     $envPath =  dirname(__FILE__) . '/.env';
     
     // load order in this class cannot be guaranteed, may happen before or after

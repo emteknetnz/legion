@@ -5,6 +5,10 @@ echo "Handling shared folder permission"
 groupadd -g 998 myvboxsf
 usermod -aG myvboxsf www-data
 
+# set identifier file used by dockerenv/bootstrap.php
+echo "Adding is_legion_docker.txt file into /home"
+touch /home/is_legion_docker.txt
+
 echo ""
 echo "ALL READY!"
 echo ""

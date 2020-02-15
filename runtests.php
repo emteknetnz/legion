@@ -3,7 +3,7 @@
 echo "runtests.php\n";
 
 if (count($argv) < 2) {
-    echo "Usage: php runtests.php [testdir]";
+    echo "Usage: php runtests.php [testdir]\n";
     die;
 }
 
