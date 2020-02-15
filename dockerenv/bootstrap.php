@@ -7,15 +7,14 @@ if (file_exists('/home/is_legion_docker.txt')) {
     // load order in this class cannot be guaranteed, may happen before or after
     // silverstripe/framework/src/includes/constants.php
     
-    // silverstripe framework was autoloaded first
-    // overwrite values by local .env.docker over the top of it
     if (class_exists('SilverStripe\Core\EnvironmentLoader')) {
+        // this module was autoloaded AFTER silverstripe framework
+
+        // overwrite values by local .env.docker over the top of it
         $loader = new SilverStripe\Core\EnvironmentLoader();
         $loader->loadFile($envPath, true);
-    }
-
-    // this module was autoloaded before silverstripe framework
-    if (!class_exists('SilverStripe\Core\EnvironmentLoader')) {
+    } else {
+        // this module was autoloaded BEFORE silverstripe framework
 
         // this is to stop .env being loaded in constants.php when the silverstripe
         // framework module is loaded
