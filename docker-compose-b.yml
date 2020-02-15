@@ -5,7 +5,7 @@ services:
     build: 
       context: ./dockerfiles/webserver
     container_name: 'legion_b_webserver'
-    restart: 'always'
+    restart: 'no'
     # ports:
     #   # TODO: either remove the port, or increment it
     #   # you could increment by cp this file with a new name
@@ -26,7 +26,7 @@ services:
   database:  
     build: ./dockerfiles/database
     container_name: 'legion_b_database'
-    restart: 'always'
+    restart: 'no'
     environment:
       MYSQL_ROOT_PASSWORD: root
 
@@ -35,7 +35,9 @@ services:
 # start container
 # docker-compose -f vendor/emteknetnz/legion/docker-compose-b.yml up
 # docker-compose -f docker-compose-b.yml up
-# docker-compose -f docker-compose-b.yml up && docker-compose -f docker-compose-b.yml rm 
+# docker-compose -f docker-compose-b.yml -d up
+# docker-compose -f docker-compose-b.yml run --rm webserver php vendor/emteknetnz/legion/runtests.php
+# docker-compose -f vendor/emteknetnz/legion/docker-compose-b.yml run --rm webserver php vendor/emteknetnz/legion/runtests.php
 
 # ssh in to webserver
 # docker exec -it $(docker ps | grep legion_b_webserver | sed -n -r 's/^([^ ]+).+$/\1/p') bash

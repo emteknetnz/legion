@@ -5,7 +5,7 @@ services:
     build: 
       context: ./dockerfiles/webserver
     container_name: 'legion_a_webserver'
-    restart: 'always'
+    restart: 'no'
     ports:
      - "1080:80"
 #     - "1443:443"
@@ -22,7 +22,7 @@ services:
   database:  
     build: ./dockerfiles/database
     container_name: 'legion_a_database'
-    restart: 'always'
+    restart: 'no'
 #    ports:
 #      - "13306:3306"
     environment:
