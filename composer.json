@@ -11,7 +11,7 @@
     },
     "autoload": {
         "files": [
-            "dockerenv/autoload.php"
+            "dockerenv/bootstrap.php"
         ]
     },
     "config": {

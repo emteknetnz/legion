@@ -2,17 +2,18 @@
 
 echo "runtests.php\n";
 
-// ---
+if (count($argv) < 2) {
+    echo "Usage: php runtests.php [testdir]";
+    die;
+}
 
 $basedir = dirname(__FILE__) . "/../../..";
+$testdir = "$basedir/" . $argv[1];
 $logdir = dirname(__FILE__) . '/testresults';
 $moduledir = dirname(__FILE__);
 
 // TODO: hardcoded
-$unittestdir = "$basedir/app/src";
-
-// TODO: hardcoded
-$s = file_get_contents("$unittestdir/MyTest.php");
+$s = file_get_contents("$testdir/MyTest.php");
 
 $timestart = microtime(true); 
 
@@ -39,7 +40,7 @@ foreach ($funcnames as $funcname) {
     // - Slower performance
 
     // the following will run inside container A with a pwd of /var/www/html
-    shell_exec("docker-compose -f $moduledir/docker-compose-b.yml run --name myphpunit-$funcname -d --no-deps webserver_b bash -c 'vendor/bin/phpunit --filter=$funcname $unittestdir > $logdir/$funcname.txt 2>&1'");
+    shell_exec("docker-compose -f $moduledir/docker-compose-b.yml run --name myphpunit-$funcname -d --no-deps webserver_b bash -c 'vendor/bin/phpunit --filter=$funcname $testdir > $logdir/$funcname.txt 2>&1'");
 }
 
 for ($i = 0; $i < 10; $i++) {
