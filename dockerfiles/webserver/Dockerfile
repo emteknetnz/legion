@@ -39,18 +39,24 @@ RUN docker-php-source extract \
  && docker-php-ext-install tidy \
  && docker-php-ext-install exif \
  && docker-php-ext-install bcmath \
-
 # commenting out bz2 because it failed to install, not sure if used anywhere
 # "configure: error: Please reinstall the BZip2 distribution"
 # && docker-php-ext-install bz2 \
-
 # commenting out to speed install up a little
 # TODO renable
 # && yes '' | pecl install memcached && docker-php-ext-enable memcached \
 # && yes '' | pecl install redis && docker-php-ext-enable redis \
 # && yes '' | pecl install imagick && docker-php-ext-enable imagick \
 # && yes '' | pecl install apcu && docker-php-ext-enable apcu \
-
  && docker-php-source delete
+
+# set identifier file used by dockerenv/bootstrap.php
+RUN touch /home/is_legion_docker.txt
+
+# create a new group and add www-data (apache user) to it
+# this is for when you're using a virtualbox on Win10 shared folder i.e.
+# Win10 -> Ubuntu VM -> Dockerfile
+RUN groupadd -g 998 myvboxsf
+RUN usermod -aG myvboxsf www-data
 
 RUN a2enmod rewrite headers
