@@ -24,10 +24,12 @@ foreach ($funcnames as $funcname) {
     echo "Creating container for $funcname\n";
     //shell_exec("docker run --name myphpunit-$funcname --rm -d -v $(pwd):/a php:cli bash -c '/a/vendor/bin/phpunit --filter=$funcname /a/unittests.php > /a/phpunitlogs/$funcname.txt 2>&1'");
 
+    // TODO try:
+    // -- docker-compose run --no-deps
+    // -- docker-compose exec
+
     // the following will run inside container A with a pwd of /var/www/html
-    $cmd = "docker-compose -f $moduledir/docker-compose-b.yml run --name myphpunit-$funcname -d webserver vendor/bin/phpunit --filter=$funcname $unittestdir > $logdir/$funcname.txt 2>&1";
-    echo "$cmd\n";
-    shell_exec($cmd);
+    shell_exec("docker-compose -f $moduledir/docker-compose-b.yml run --name myphpunit-$funcname -d webserver bash -c 'vendor/bin/phpunit --filter=$funcname $unittestdir > $logdir/$funcname.txt 2>&1'");
 }
 
 for ($i = 0; $i < 10; $i++) {
