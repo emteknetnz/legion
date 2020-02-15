@@ -25,7 +25,7 @@ foreach ($funcnames as $funcname) {
     //shell_exec("docker run --name myphpunit-$funcname --rm -d -v $(pwd):/a php:cli bash -c '/a/vendor/bin/phpunit --filter=$funcname /a/unittests.php > /a/phpunitlogs/$funcname.txt 2>&1'");
 
     // TODO try:
-    // -- docker-compose run --no-deps
+    // -- docker-compose run --no-deps (will need this plug test into a database)
     // -- docker-compose exec
 
     // the following will run inside container A with a pwd of /var/www/html
