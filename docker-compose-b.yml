@@ -1,10 +1,10 @@
 version: "3"
 
 services:
-  webserver_b:
+  webserver_service_b:
     build: 
       context: ./dockerfiles/webserver
-    container_name: 'legion_b_webserver'
+    container_name: 'webserver_name_b'
     restart: 'no'
     # ports:
     #   # TODO: either remove the port, or increment it
@@ -12,7 +12,7 @@ services:
     #   # then use the new file to docker-compose up, later rm it
     #  - "1081:80"
     links: 
-      - database_b
+      - database_service_ab
     volumes: 
       # These are shared from Host to B, not from A to B
       # I don't beleive it's because of docker.sock, I think it's just how things are
@@ -23,21 +23,18 @@ services:
     command: 
       # this will be run by sh with a pwd of /var/www/html
       - vendor/emteknetnz/legion/commands/script-b.sh
-  database_b:  
+  database_service_ab:  
     build: ./dockerfiles/database
-    container_name: 'legion_b_database'
+    container_name: 'database_name_ab'
     restart: 'no'
     environment:
       MYSQL_ROOT_PASSWORD: root
 
 # run unit test in container
 
-# start container
+# start containerphp
 # docker-compose -f vendor/emteknetnz/legion/docker-compose-b.yml up
-# docker-compose -f docker-compose-b.yml up
-# docker-compose -f docker-compose-b.yml -d up
-# docker-compose -f docker-compose-b.yml run --rm webserver php vendor/emteknetnz/legion/runtests.php
-# docker-compose -f vendor/emteknetnz/legion/docker-compose-b.yml run --rm webserver php vendor/emteknetnz/legion/runtests.php
+
 
 # ssh in to webserver
 # docker exec -it $(docker ps | grep legion_b_webserver | sed -n -r 's/^([^ ]+).+$/\1/p') bash

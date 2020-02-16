@@ -1,6 +1,12 @@
 <?php
 
-echo "runtests.php\n";
+// This should only be run from within container_a
+// This file is called by the host will should run fromhost.php
+
+if (!file_exists('/home/is_legion_docker.txt')) {
+    echo "This file should only be run from within docker container_a\n";
+    die;
+}
 
 if (count($argv) < 2) {
     echo "Usage: php runtests.php [testdir]\n";
@@ -40,7 +46,7 @@ foreach ($funcnames as $funcname) {
     // - Slower performance
 
     // the following will run inside container A with a pwd of /var/www/html
-    shell_exec("docker-compose -f $moduledir/docker-compose-b.yml run --name myphpunit-$funcname -d --no-deps webserver_b bash -c 'vendor/bin/phpunit --filter=$funcname $testdir > $logdir/$funcname.txt 2>&1'");
+    shell_exec("docker-compose -f $moduledir/docker-compose-b.yml run --name myphpunit-$funcname -d --no-deps webserver_service_b bash -c 'vendor/bin/phpunit --filter=$funcname $testdir > $logdir/$funcname.txt 2>&1'");
 }
 
 for ($i = 0; $i < 10; $i++) {
