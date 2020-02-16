@@ -6,11 +6,6 @@ services:
       context: ./dockerfiles/webserver
     container_name: 'webserver_name_b'
     restart: 'no'
-    # ports:
-    #   # TODO: either remove the port, or increment it
-    #   # you could increment by cp this file with a new name
-    #   # then use the new file to docker-compose up, later rm it
-    #  - "1081:80"
     links: 
       - database_service_ab
     volumes: 
@@ -30,14 +25,5 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
 
-# run unit test in container
-
 # start containerphp
 # docker-compose -f vendor/emteknetnz/legion/docker-compose-b.yml up
-
-
-# ssh in to webserver
-# docker exec -it $(docker ps | grep legion_b_webserver | sed -n -r 's/^([^ ]+).+$/\1/p') bash
-
-# connect to mysql from websever
-# mysql -uroot -proot -h database

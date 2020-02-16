@@ -1,4 +1,12 @@
+# Overview
+
 This is a dev only module to get phpunit running parallel in silverstripe projects using docker
+
+# Usage
+
+vendor/bin/legion app/tests
+
+# Details
 
 Host
 -> Docker container A  -- Primary controller for multiple container B secondaries
