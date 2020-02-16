@@ -1,7 +1,5 @@
 <?php
 
-// TODO: Win10 -> VM (host) so can call vendor/bin/legion from Win10
-
 $dockerInstalled = true;
 if (is_null(shell_exec('which docker'))) {
     // TODO: link to instructions
