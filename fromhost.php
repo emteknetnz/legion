@@ -1,15 +1,23 @@
 <?php
 
-/*
-- host machine calls this script
-- will propably be linked to from vendor/bin/legion
-- will spin up container a
-- this may include building/downloading image form dockerhub
-- will run /dev/build?flush on container a
-- this step will be potentially very slow, so need messaging to set expectations with user
-*/
+// TODO: Win10 -> VM (host) so can call vendor/bin/legion from Win10
 
-// TODO: detect host machine has docker and docker-compose installed
+$dockerInstalled = true;
+if (is_null(shell_exec('which docker'))) {
+    // TODO: link to instructions
+    echo "docker must be installed\n";
+    $dockerInstalled = false;
+}
+
+if (is_null(shell_exec('which docker-compose'))) {
+    // TODO: link to instructions
+    echo "docker-compose must be installed\n";
+    $dockerInstalled = false;
+}
+
+if (!$dockerInstalled) {
+    die;
+}
 
 // current limitation is only one instance of legion on a host machine at once
 $conaexists = !is_null(shell_exec('docker ps --filter "name=webserver_name_a"'));
@@ -19,14 +27,14 @@ if (!$conaexists) {
 
     // up -d is pretty nice here,  it will spin it up the container detached, though
     // it will still wait for it to complete before going to the next line of php
-    echo "\nSpinning up primary legion container, this may take a while\n";
+    echo "Spinning up primary legion container, this may take a while\n";
     shell_exec("docker-compose -f $moduledir/docker-compose-a.yml up -d");
-    echo "\nContainer created\n";
+    echo "Container created\n";
     
     $conaid = trim(shell_exec('docker ps -q --filter "name=webserver_name_a"'));
-    echo "\nRunning dev/build flush=1 in container\n";
+    echo "Running dev/build flush=1 in container\n";
     shell_exec("docker exec $conaid bash -c 'vendor/bin/sake dev/build flush=1'"); // << is running command on host
-    echo "\ndev/build flush=1 complete\n";
+    echo "dev/build flush=1 complete\n";
 }
 
 // run tests
@@ -37,8 +45,6 @@ if (count($argv) < 2) {
 $testdir = $argv[1];
 $conaid = trim(shell_exec('docker ps -q --filter "name=webserver_name_a"'));
 shell_exec("docker exec $conaid bash -c 'php vendor/emteknetnz/legion/runtests.php $testdir'");
-
-// TODO: runtests.php
 
 // php vendor/emteknetnz/legion/fromhost.php 
 
