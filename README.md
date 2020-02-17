@@ -2,6 +2,10 @@
 
 This is a dev only module to get phpunit running parallel in silverstripe projects using docker
 
+# Installation
+
+composer require --dev emteknetnz/legion
+
 # Usage
 
 vendor/bin/legion app/tests
