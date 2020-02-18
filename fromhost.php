@@ -18,7 +18,7 @@ if (!$dockerInstalled) {
 }
 
 // current limitation is only one instance of legion on a host machine at once
-$conaexists = !is_null(shell_exec('docker ps --filter "name=webserver_name_a"'));
+$conaexists = !is_null(shell_exec('docker ps -q --filter "name=webserver_name_a"'));
 
 if (!$conaexists) {
     $moduledir = dirname(__FILE__);
