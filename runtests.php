@@ -21,7 +21,7 @@ $moduledir = dirname(__FILE__);
 // TODO: hardcoded
 $s = file_get_contents("$testdir/MyTest.php");
 
-$timestart = microtime(true); 
+$timestart = microtime(true);
 
 shell_exec("rm -rf $logdir && mkdir $logdir");
 
@@ -41,12 +41,16 @@ foreach ($funcnames as $funcname) {
 
     // (omit --no-deps)
     // - Initially will say Creating legion_b_database legion_b_database
-    // - The next test will then say 'Starting legion_b_database, though I think using the one currently being used by the first test
-    // - Will show anooying message WARNING: Found orphan containers (legion_a_webserver, legion_a_database) for this project
+    // - The next test will then say 'Starting legion_b_database, though I think using the one
+    // currently being used by the first test
+    // - Will show anooying message WARNING: Found orphan containers (legion_a_webserver, legion_a_database)
+    //   for this project
     // - Slower performance
 
     // the following will run inside container A with a pwd of /var/www/html
-    shell_exec("docker-compose -f $moduledir/docker-compose-b.yml run --name myphpunit-$funcname -d --no-deps webserver_service_b bash -c 'vendor/bin/phpunit --filter=$funcname $testdir > $logdir/$funcname.txt 2>&1'");
+    shell_exec("docker-compose -f $moduledir/docker-compose-b.yml run " .
+        "--name myphpunit-$funcname -d --no-deps webserver_service_b " .
+        "bash -c 'vendor/bin/phpunit --filter=$funcname $testdir > $logdir/$funcname.txt 2>&1'");
 }
 
 for ($i = 0; $i < 10; $i++) {

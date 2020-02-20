@@ -3,7 +3,7 @@
 // this file is called from vendor/composer/autoload_static on application startup
 // this is enabled via composer.json in this module
 
-// check for existance of identifier fileset in script-a.sh or script-b.sh 
+// check for existance of identifier fileset in script-a.sh or script-b.sh
 if (file_exists('/home/is_legion_docker.txt')) {
     $envPath =  dirname(__FILE__) . '/.env';
     
