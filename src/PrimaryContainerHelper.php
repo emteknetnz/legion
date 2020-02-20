@@ -4,51 +4,51 @@ namespace Emteknetnz\Legion;
 
 class PrimaryContainerHelper
 {
-    private function isInsideDocker(): bool
+    public function init()
     {
-        return file_exists('/home/is_legion_docker.txt');
+        $timeStart = microtime(true);
+        $this->checkIsInsideDocker();
+
+        $specifiedTestDir = $this->getSpecifiedTestDir();
+        $baseDir = dirname(__FILE__) . "/../../../..";
+        $testDir = "$baseDir/" . $specifiedTestDir;
+        $logDir = dirname(__FILE__) . '/../testresults';
+        $moduleDir = dirname(__FILE__) . '/..';
+        $funcNames = $this->getTestFunctionNames($testDir);
+        
+        $this->createLogDir($logDir);
+        $this->runTestsInsideSecondaryContainers($testDir, $funcNames, $moduleDir, $logDir);
+        $this->waitForTestsToComplete();
+        $this->removeSecondaryContainers($funcNames);
+        $this->parseTestResults($logDir);
+        $this->calculatorExecutionTime($timeStart);
     }
 
-    private function waitForTestsToComplete(): void
+    private function checkIsInsideDocker(): void
     {
-        for ($i = 0; $i < 10; $i++) {
-            $s = shell_exec('docker ps');
-            if (preg_match('%myphpunit\-%', $s)) {
-                echo "Waiting for tests to complete ...\n";
-                sleep(1);
-                continue;
-            }
-            break;
-        }
-    }
-
-    public function runTests()
-    {
-        if (!$this->isInsideDocker()) {
+        if (!file_exists('/home/is_legion_docker.txt')) {
             echo "This file should only be run from within docker container_a\n";
             die;
         }
-        
+    }
+
+    private function getSpecifiedTestDir(): string
+    {
         $argv = $_SERVER['argv'];
         if (count($argv) < 2) {
             echo "Please specify a test directory\n";
             die;
         }
-        
-        $baseDir = dirname(__FILE__) . "/../../../..";
-        $testDir = "$baseDir/" . $argv[1];
-        $logDir = dirname(__FILE__) . '/../testresults';
-        $moduleDir = dirname(__FILE__) . '/..';
-        
-        // TODO: hardcoded
-        $s = file_get_contents("$testDir/MyTest.php");
-        
-        $timeStart = microtime(true);
-        
-        shell_exec("rm -rf $logDir && mkdir $logDir");
-        
-        preg_match_all('%function (test[^\( ]*)%', $s, $m);
-        $funcNames = $m[1];
+        return $argv[1];
+    }
+
+    private function runTestsInsideSecondaryContainers(
+        string $testDir,
+        array $funcNames,
+        string $moduleDir,
+        string $logDir
+    ): void {
+        // TODO: return an array of container ID's and pass that to waitForTestsToComplete()
         foreach ($funcNames as $funcName) {
             echo "Creating container for $funcName\n";
         
@@ -74,15 +74,45 @@ class PrimaryContainerHelper
                 "--name myphpunit-$funcName -d --no-deps webserver_service_b " .
                 "bash -c 'vendor/bin/phpunit --filter=$funcName $testDir > $logDir/$funcName.txt 2>&1'");
         }
+    }
 
-        $this->waitForTestsToComplete();
-                
+    private function waitForTestsToComplete(): void
+    {
+        for ($i = 0; $i < 10; $i++) {
+            $s = shell_exec('docker ps');
+            if (preg_match('%myphpunit\-%', $s)) {
+                echo "Waiting for tests to complete ...\n";
+                sleep(1);
+                continue;
+            }
+            break;
+        }
+    }
+
+    private function createLogDir(string $logDir): void
+    {
+        shell_exec("rm -rf $logDir && mkdir $logDir");
+    }
+
+    private function getTestFunctionNames(string $testDir): array
+    {
+        // TODO: hardcoded
+        $s = file_get_contents("$testDir/MyTest.php");
+        preg_match_all('%function (test[^\( ]*)%', $s, $m);
+        return $m[1];
+    }
+
+    private function removeSecondaryContainers(array $funcNames): void
+    {
         // remove containers (cannot use --rm with -d in docker-compose run)
         foreach ($funcNames as $funcName) {
             echo "Removing docker container myphpunit-$funcName\n";
             shell_exec("docker rm myphpunit-$funcName");
         }
-        
+    }
+
+    private function parseTestResults(string $logDir)
+    {
         // TODO: something that better parses all the results in phpunitlogs
         foreach (scandir($logDir) as $filename) {
             if (!preg_match('%^test.*?\.txt$%', $filename)) {
@@ -93,7 +123,10 @@ class PrimaryContainerHelper
             $s = preg_replace('%PHPUnit .+? by Sebastian Bergmann[^\n]*%', '', $s);
             echo $s;
         }
-        
+    }
+
+    private function calculatorExecutionTime(int $timeStart)
+    {
         $executionTime = round(microtime(true) - $timeStart, 2);
         echo "\nTotal Execution Time: $executionTime seconds\n\n";
     }

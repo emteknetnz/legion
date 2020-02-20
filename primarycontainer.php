@@ -7,4 +7,4 @@ use Emteknetnz\Legion\PrimaryContainerHelper;
 require 'src/autoload.php';
 
 $primaryContainer = new PrimaryContainerHelper();
-$primaryContainer->runTests();
+$primaryContainer->init();

@@ -9,4 +9,4 @@ use Emteknetnz\Legion\HostHelper;
 require 'src/autoload.php';
 
 $hostHelper = new HostHelper();
-$hostHelper->doStuff();
+$hostHelper->init();
