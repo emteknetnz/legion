@@ -1,7 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-// this file is linked automatically linked to vendor/bin/legion by composer
+// This file is linked automatically linked to vendor/bin/legion by composer
+// Normal usage is the the user on the host machine will run vendor/bin/legion
 
 $dockerInstalled = true;
 if (is_null(shell_exec('which docker'))) {

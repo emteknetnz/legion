@@ -1,7 +1,6 @@
 <?php
 
-// This should only be run from within container_a
-// This file is called by the host will should run fromhost.php
+// This file should only be run from within docker container_a
 
 if (!file_exists('/home/is_legion_docker.txt')) {
     echo "This file should only be run from within docker container_a\n";
@@ -9,26 +8,26 @@ if (!file_exists('/home/is_legion_docker.txt')) {
 }
 
 if (count($argv) < 2) {
-    echo "Usage: php runtests.php [testdir]\n";
+    echo "Usage: php runtests.php [testDir]\n";
     die;
 }
 
-$basedir = dirname(__FILE__) . "/../../..";
-$testdir = "$basedir/" . $argv[1];
-$logdir = dirname(__FILE__) . '/testresults';
-$moduledir = dirname(__FILE__);
+$baseDir = dirname(__FILE__) . "/../../..";
+$testDir = "$baseDir/" . $argv[1];
+$logDir = dirname(__FILE__) . '/testresults';
+$moduleDir = dirname(__FILE__);
 
 // TODO: hardcoded
-$s = file_get_contents("$testdir/MyTest.php");
+$s = file_get_contents("$testDir/MyTest.php");
 
-$timestart = microtime(true);
+$timeStart = microtime(true);
 
-shell_exec("rm -rf $logdir && mkdir $logdir");
+shell_exec("rm -rf $logDir && mkdir $logDir");
 
 preg_match_all('%function (test[^\( ]*)%', $s, $m);
-$funcnames = $m[1];
-foreach ($funcnames as $funcname) {
-    echo "Creating container for $funcname\n";
+$funcNames = $m[1];
+foreach ($funcNames as $funcName) {
+    echo "Creating container for $funcName\n";
 
     // this will spin up a new webserver_b that will be removed after phpunit
     // is run from inside of it
@@ -48,9 +47,9 @@ foreach ($funcnames as $funcname) {
     // - Slower performance
 
     // the following will run inside container A with a pwd of /var/www/html
-    shell_exec("docker-compose -f $moduledir/docker-compose-b.yml run " .
-        "--name myphpunit-$funcname -d --no-deps webserver_service_b " .
-        "bash -c 'vendor/bin/phpunit --filter=$funcname $testdir > $logdir/$funcname.txt 2>&1'");
+    shell_exec("docker-compose -f $moduleDir/docker-compose-b.yml run " .
+        "--name myphpunit-$funcName -d --no-deps webserver_service_b " .
+        "bash -c 'vendor/bin/phpunit --filter=$funcName $testDir > $logDir/$funcName.txt 2>&1'");
 }
 
 for ($i = 0; $i < 10; $i++) {
@@ -64,24 +63,24 @@ for ($i = 0; $i < 10; $i++) {
 }
 
 // remove containers (cannot use --rm with -d in docker-compose run)
-foreach ($funcnames as $funcname) {
-    echo "Removing docker container myphpunit-$funcname\n";
-    shell_exec("docker rm myphpunit-$funcname");
+foreach ($funcNames as $funcName) {
+    echo "Removing docker container myphpunit-$funcName\n";
+    shell_exec("docker rm myphpunit-$funcName");
 }
 
 // TODO: something that better parses all the results in phpunitlogs
-foreach (scandir($logdir) as $filename) {
+foreach (scandir($logDir) as $filename) {
     if (!preg_match('%^test.*?\.txt$%', $filename)) {
         continue;
     }
     echo "\nParsing $filename\n";
-    $s = file_get_contents("$logdir/$filename");
+    $s = file_get_contents("$logDir/$filename");
     $s = preg_replace('%PHPUnit .+? by Sebastian Bergmann[^\n]*%', '', $s);
     //echo $s;
 }
 
-$executiontime = round(microtime(true) - $timestart, 2);
-echo "\n\nTotal Execution Time: $executiontime seconds\n\n";
+$executionTime = round(microtime(true) - $timeStart, 2);
+echo "\n\nTotal Execution Time: $executionTime seconds\n\n";
 
 // from within container A:
 // php vendor/emteknetnz/legion/runtests.php
