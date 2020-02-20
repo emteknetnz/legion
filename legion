@@ -31,7 +31,7 @@ if (!$conaexists) {
     
     $conaid = trim(shell_exec('docker ps -q --filter "name=webserver_name_a"'));
     echo "Running dev/build flush=1 in container\n";
-    shell_exec("docker exec $conaid bash -c 'vendor/bin/sake dev/build flush=1'"); // << is running command on host
+    shell_exec("docker exec $conaid bash -c 'vendor/bin/sake dev/build flush=1'");
     echo "dev/build flush=1 complete\n";
 }
 
