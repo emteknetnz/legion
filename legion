@@ -5,14 +5,12 @@
 
 $dockerInstalled = true;
 if (is_null(shell_exec('which docker'))) {
-    // TODO: link to instructions
-    echo "docker must be installed\n";
+    echo "docker must be installed - https://docs.docker.com/install/\n";
     $dockerInstalled = false;
 }
 
 if (is_null(shell_exec('which docker-compose'))) {
-    // TODO: link to instructions
-    echo "docker-compose must be installed\n";
+    echo "docker-compose must be installed - https://docs.docker.com/compose/install/\n";
     $dockerInstalled = false;
 }
 
