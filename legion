@@ -1,4 +1,7 @@
+#!/usr/bin/env php
 <?php
+
+// this file is linked automatically linked to vendor/bin/legion by composer
 
 $dockerInstalled = true;
 if (is_null(shell_exec('which docker'))) {
@@ -43,13 +46,3 @@ if (count($argv) < 2) {
 $testdir = $argv[1];
 $conaid = trim(shell_exec('docker ps -q --filter "name=webserver_name_a"'));
 shell_exec("docker exec $conaid bash -c 'php vendor/emteknetnz/legion/runtests.php $testdir'");
-
-// php vendor/emteknetnz/legion/fromhost.php 
-
-// docker exec f2b7cdb4577a bash -c "ls /home"
-
-// docker exec f2b7cdb4577a bash -c \'ls /home\'
-
-// docker exec f2b7cdb4577a bash -c "vendor/bin/sake dev/build flush=1"
-
-// docker-compose -f vendor/emteknetnz/legion/docker-compose-a.yml up
