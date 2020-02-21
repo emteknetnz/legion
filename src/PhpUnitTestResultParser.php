@@ -29,13 +29,30 @@ class PhpUnitTestResultParser
         $testOutput = preg_replace('%PHPUnit .+? by Sebastian Bergmann[^\n]*%', '', $testOutput);
         $testOutput = preg_replace("%\nTime:.+?B\n%", '', $testOutput);
         $testOutput = str_replace("\n\n", "\n", $testOutput);
-
+        $rx = '%(?s)((OK|FAILURE).+?[\.\)])%';
+        preg_match($rx, $testOutput, $m);
+        $testResult = $m[1];
+        $testOutput = preg_replace($rx, '', $testOutput);
+        $testNumbers = $this->parseTestResult($testResult);
+        $this->addTestResultToTotals($testNumbers);
         return trim($testOutput);
     }
 
+    protected function addTestResultToTotals(array $testNumbers): void
+    {
+        $this->tests += $testNumbers['tests'];
+        $this->assertions += $testNumbers['assertions'];
+        $this->failures += $testNumbers['failures'];
+        $this->skipped += $testNumbers['skipped'];
+        $this->incomplete += $testNumbers['incomplete'];
+    }
+
+    /**
+     * e.g. OK (1 test, 1 assertion)
+     */
     public function parseTestResult(string $testResult): array
     {
-        $result = [
+        $testNumbers = [
             'tests' => 0,
             'assertions' => 0,
             'failures' => 0,
@@ -44,8 +61,8 @@ class PhpUnitTestResultParser
         ];
         $s = $testResult;
         if (preg_match('%^OK \(([0-9]+) tests?, ([0-9]+) assertions?\)$%', $s, $m)) {
-            $result['tests'] += $m[1];
-            $result['assertions'] += $m[2];
+            $testNumbers['tests'] += $m[1];
+            $testNumbers['assertions'] += $m[2];
         } else {
             $s = str_replace("OK, but incomplete, skipped, or risky tests!\n", '', $s);
             $s = str_replace("FAILURES!\n", '', $s);
@@ -54,10 +71,10 @@ class PhpUnitTestResultParser
             foreach (preg_split('%, %', $s) as $fr) {
                 $kv = preg_split('%: %', $fr);
                 $k = strtolower($kv[0]);
-                $result[$k] += $kv[1];
+                $testNumbers[$k] += $kv[1];
             }
         }
-        return $result;
+        return $testNumbers;
     }
 
     public function getFormattedOutput(): string

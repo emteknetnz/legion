@@ -37,7 +37,7 @@ class HostHelper
         if ($containerAExists) {
             echo "Primary legion container already exists, proceeding\n";
         } else {
-            $moduleDir = dirname(__FILE__) . '/..';
+            $moduleDir = __DIR__ . '/..';
 
             // up -d is pretty nice here,  it will spin it up the container detached, though
             // it will still wait for it to complete before going to the next line of php

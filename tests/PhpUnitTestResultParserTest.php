@@ -7,7 +7,7 @@ use PHPUnit_Framework_TestCase;
 
 class PhpUnitTestResultParserTest extends PHPUnit_Framework_TestCase
 {
-    public function testParseTestResult()
+    public function testParseTestResult() 
     {
         $parser = new PhpUnitTestResultParser();
         $testResults = [
@@ -34,29 +34,12 @@ class PhpUnitTestResultParserTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    public function XtestParseTestOutput()
+    public function testParseTestOutput()
     {
         $parser = new PhpUnitTestResultParser();
-        # TODO: use text fixtures
-        $input = <<<EOT
-PHPUnit 5.7.27 by Sebastian Bergmann and contributors.
-
-.                                                                   1 / 1 (100%)
-
-Time: 2.02 seconds, Memory: 16.00MB
-
-OK (1 test, 1 assertion)
-EOT;
-        $input = trim($input);
-        $expected = <<<EOT
-.                                                                   1 / 1 (100%)
-EOT;
-        $expected = trim($expected);
-        $actual = $parser->parseTestOutput($input);
-        echo "\n\n";
-        var_dump($expected);
-        var_dump($actual);
-        echo "\n\n";
+        $testOutput = file_get_contents(__DIR__ . '/fixtures/testOutputBefore.txt');
+        $expected = file_get_contents(__DIR__ . '/fixtures/testOutputExpected.txt');
+        $actual = $parser->parseTestOutput($testOutput);
         $this->assertEquals($expected, $actual);
     }
 }

@@ -10,10 +10,10 @@ class PrimaryContainerHelper
         $this->checkIsInsideDocker();
 
         $specifiedTestDir = $this->getSpecifiedTestDir();
-        $baseDir = dirname(__FILE__) . "/../../../..";
+        $baseDir = __DIR__ . "/../../../..";
         $testDir = "$baseDir/" . $specifiedTestDir;
-        $logDir = dirname(__FILE__) . '/../testresults';
-        $moduleDir = dirname(__FILE__) . '/..';
+        $logDir = __DIR__ . '/../testresults';
+        $moduleDir = __DIR__ . '/..';
         $funcNames = $this->getTestFunctionNames($testDir);
         
         $this->createLogDir($logDir);
