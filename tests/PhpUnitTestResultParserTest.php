@@ -19,9 +19,9 @@ class PhpUnitTestResultParserTest extends PHPUnit_Framework_TestCase
             "FAILURES!\nTests: 5, Assertions: 6, Failures: 1, Skipped: 1, Incomplete: 1."
         ];
         $expecteds = [
+            ['tests' => 1, 'assertions' => 1, 'failures' => 0, 'skipped' => 0, 'incomplete' => 0],
+            ['tests' => 2, 'assertions' => 4, 'failures' => 0, 'skipped' => 0, 'incomplete' => 0],
             ['tests' => 1, 'assertions' => 1, 'failures' => 1, 'skipped' => 0, 'incomplete' => 0],
-            ['tests' => 2, 'assertions' => 4, 'failures' => 1, 'skipped' => 0, 'incomplete' => 0],
-            ['tests' => 1, 'assertions' => 1, 'failures' => 1, 'skipped' => 1, 'incomplete' => 0],
             ['tests' => 2, 'assertions' => 3, 'failures' => 0, 'skipped' => 1, 'incomplete' => 0],
             ['tests' => 1, 'assertions' => 0, 'failures' => 0, 'skipped' => 0, 'incomplete' => 1],
             ['tests' => 5, 'assertions' => 6, 'failures' => 1, 'skipped' => 1, 'incomplete' => 1],
@@ -30,7 +30,7 @@ class PhpUnitTestResultParserTest extends PHPUnit_Framework_TestCase
             $testResult = $testResults[$i];
             $expected = $expecteds[$i];
             $actual = $parser->parseTestResult($testResult);
-            $this->assertEquals($expected, $actual);
+            $this->assertEquals($expected, $actual, "i = $i");
         }
     }
 

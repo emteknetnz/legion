@@ -25,6 +25,7 @@ class PhpUnitTestResultParser
 
     public function parseTestOutput(string $testOutput): string
     {
+        // TODO: check that output is using PHPUnit 5.7, otherwise through exeception
         $testOutput = preg_replace('%PHPUnit .+? by Sebastian Bergmann[^\n]*%', '', $testOutput);
         $testOutput = preg_replace("%\nTime:.+?B\n%", '', $testOutput);
         $testOutput = str_replace("\n\n", "\n", $testOutput);
@@ -41,13 +42,20 @@ class PhpUnitTestResultParser
             'skipped' => 0,
             'incomplete' => 0,
         ];
-        if (preg_match('%^OK \(([0-9]+) tests?, ([0-9]+) assertions?\)$%', $testResult, $m)) {
-            $result[] += $m[1];
-            $assertions += $m[2];
-        } elseif (preg_match('%%', $testResult)) {
-
-        } elseif (preg_match('%%', $testResult)) {
-            
+        $s = $testResult;
+        if (preg_match('%^OK \(([0-9]+) tests?, ([0-9]+) assertions?\)$%', $s, $m)) {
+            $result['tests'] += $m[1];
+            $result['assertions'] += $m[2];
+        } else {
+            $s = str_replace("OK, but incomplete, skipped, or risky tests!\n", '', $s);
+            $s = str_replace("FAILURES!\n", '', $s);
+            $s = preg_replace('%\.$%', '', $s);
+            // Tests: 5, Assertions: 6, Failures: 1, Skipped: 1, Incomplete: 1
+            foreach (preg_split('%, %', $s) as $fr) {
+                $kv = preg_split('%: %', $fr);
+                $k = strtolower($kv[0]);
+                $result[$k] += $kv[1];
+            }
         }
         return $result;
     }
