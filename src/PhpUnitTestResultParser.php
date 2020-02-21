@@ -34,7 +34,22 @@ class PhpUnitTestResultParser
 
     public function parseTestResult(string $testResult): array
     {
+        $result = [
+            'tests' => 0,
+            'assertions' => 0,
+            'failures' => 0,
+            'skipped' => 0,
+            'incomplete' => 0,
+        ];
+        if (preg_match('%^OK \(([0-9]+) tests?, ([0-9]+) assertions?\)$%', $testResult, $m)) {
+            $result[] += $m[1];
+            $assertions += $m[2];
+        } elseif (preg_match('%%', $testResult)) {
 
+        } elseif (preg_match('%%', $testResult)) {
+            
+        }
+        return $result;
     }
 
     public function getFormattedOutput(): string
