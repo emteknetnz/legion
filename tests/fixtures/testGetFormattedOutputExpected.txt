@@ -1,0 +1,7 @@
+.                                                                   1 / 1 (100%)
+.F                                                                  2 / 2 (100%)
+There was 1 failure:
+1) MyTest::testSeven
+Failed asserting that false is true.
+/var/www/html/app/src/MyTest.php:61
+Tests: 3, Assertions: 5, Failures: 1, Skipped: 0, Incomplete: 0

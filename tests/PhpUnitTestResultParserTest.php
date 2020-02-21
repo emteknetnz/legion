@@ -37,9 +37,21 @@ class PhpUnitTestResultParserTest extends PHPUnit_Framework_TestCase
     public function testParseTestOutput()
     {
         $parser = new PhpUnitTestResultParser();
-        $testOutput = file_get_contents(__DIR__ . '/fixtures/testOutputBefore.txt');
-        $expected = file_get_contents(__DIR__ . '/fixtures/testOutputExpected.txt');
+        $testOutput = file_get_contents(__DIR__ . '/fixtures/testOutputOne.txt');
+        $expected = file_get_contents(__DIR__ . '/fixtures/testOutputOneExpected.txt');
         $actual = $parser->parseTestOutput($testOutput);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testParseTestOutputFileAndGetFormattedOutput()
+    {
+        $parser = new PhpUnitTestResultParser();
+        $parser->parseTestOutputFile(__DIR__ . '/fixtures/testOutputOne.txt');
+        $parser->parseTestOutputFile(__DIR__ . '/fixtures/testOutputTwo.txt');
+        $expected = file_get_contents(__DIR__ . '/fixtures/testGetFormattedOutputExpected.txt');
+        $actual = $parser->getFormattedOutput();
+        file_put_contents('testresults/expected.txt', $expected);
+        file_put_contents('testresults/actual.txt', $actual);
         $this->assertEquals($expected, $actual);
     }
 }

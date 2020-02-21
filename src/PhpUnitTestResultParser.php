@@ -18,7 +18,6 @@ class PhpUnitTestResultParser
 
     public function parseTestOutputFile(string $filepath): void
     {
-        echo "Parsing $filepath\n";
         $testOutput = file_get_contents($filepath);
         $this->parsedTestOutputs[] = $this->parseTestOutput($testOutput);
     }
@@ -79,6 +78,14 @@ class PhpUnitTestResultParser
 
     public function getFormattedOutput(): string
     {
-        return implode("\n", $this->parsedTestOutputs);
+        $output = implode("\n", $this->parsedTestOutputs);
+        $output .= "\n" . implode(', ', [
+            "Tests: " . $this->tests,
+            "Assertions: " . $this->assertions,
+            "Failures: " . $this->failures,
+            "Skipped: " . $this->skipped,
+            "Incomplete: " . $this->incomplete
+        ]) . "\n";
+        return $output;
     }
 }
