@@ -4,7 +4,7 @@ namespace Emteknetnz\Legion;
 
 class PrimaryContainerHelper
 {
-    public function init()
+    public function init(): void
     {
         $timeStart = microtime(true);
         $this->checkIsInsideDocker();
@@ -20,11 +20,11 @@ class PrimaryContainerHelper
         $this->runTestsInsideSecondaryContainers($testDir, $funcNames, $moduleDir, $logDir);
         $this->waitForTestsToComplete();
         $this->removeSecondaryContainers($funcNames);
-        $this->parseTestResults($logDir);
-        $this->calculatorExecutionTime($timeStart);
+        $this->parseTestOutputs($logDir);
+        $this->echoExecutionTime($timeStart);
     }
 
-    private function checkIsInsideDocker(): void
+    protected function checkIsInsideDocker(): void
     {
         if (!file_exists('/home/is_legion_docker.txt')) {
             echo "This file should only be run from within docker container_a\n";
@@ -32,7 +32,7 @@ class PrimaryContainerHelper
         }
     }
 
-    private function getSpecifiedTestDir(): string
+    protected function getSpecifiedTestDir(): string
     {
         $argv = $_SERVER['argv'];
         if (count($argv) < 2) {
@@ -42,7 +42,7 @@ class PrimaryContainerHelper
         return $argv[1];
     }
 
-    private function runTestsInsideSecondaryContainers(
+    protected function runTestsInsideSecondaryContainers(
         string $testDir,
         array $funcNames,
         string $moduleDir,
@@ -76,7 +76,7 @@ class PrimaryContainerHelper
         }
     }
 
-    private function waitForTestsToComplete(): void
+    protected function waitForTestsToComplete(): void
     {
         for ($i = 0; $i < 10; $i++) {
             $s = shell_exec('docker ps');
@@ -89,12 +89,12 @@ class PrimaryContainerHelper
         }
     }
 
-    private function createLogDir(string $logDir): void
+    protected function createLogDir(string $logDir): void
     {
         shell_exec("rm -rf $logDir && mkdir $logDir");
     }
 
-    private function getTestFunctionNames(string $testDir): array
+    protected function getTestFunctionNames(string $testDir): array
     {
         // TODO: hardcoded
         $s = file_get_contents("$testDir/MyTest.php");
@@ -102,7 +102,7 @@ class PrimaryContainerHelper
         return $m[1];
     }
 
-    private function removeSecondaryContainers(array $funcNames): void
+    protected function removeSecondaryContainers(array $funcNames): void
     {
         // remove containers (cannot use --rm with -d in docker-compose run)
         foreach ($funcNames as $funcName) {
@@ -111,21 +111,20 @@ class PrimaryContainerHelper
         }
     }
 
-    private function parseTestResults(string $logDir)
+    protected function parseTestOutputs(string $logDir): void
     {
-        // TODO: something that better parses all the results in phpunitlogs
+        $parser = new PhpUnitTestResultParser();
         foreach (scandir($logDir) as $filename) {
             if (!preg_match('%^test.*?\.txt$%', $filename)) {
                 continue;
             }
-            echo "Parsing $filename\n";
-            $s = file_get_contents("$logDir/$filename");
-            $s = preg_replace('%PHPUnit .+? by Sebastian Bergmann[^\n]*%', '', $s);
-            echo $s;
+            $filepath = "$logDir/$filename";
+            $parser->parseTestOutputFile($filepath);
         }
+        echo $parser->getFormattedOutput();
     }
 
-    private function calculatorExecutionTime(int $timeStart)
+    protected function echoExecutionTime(int $timeStart): void
     {
         $executionTime = round(microtime(true) - $timeStart, 2);
         echo "\nTotal Execution Time: $executionTime seconds\n\n";

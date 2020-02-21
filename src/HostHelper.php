@@ -11,7 +11,7 @@ class HostHelper
         $this->runTests();
     }
 
-    private function checkDockerInstalled(): void
+    protected function checkDockerInstalled(): void
     {
         $dockerInstalled = true;
         if (is_null(shell_exec('which docker'))) {
@@ -29,13 +29,13 @@ class HostHelper
         }
     }
 
-    private function createPrimaryContainer(): void
+    protected function createPrimaryContainer(): void
     {
         // current limitation is only one instance of legion on a host machine at once
         $containerAExists = !is_null(shell_exec('docker ps -q --filter "name=webserver_name_a"'));
 
         if ($containerAExists) {
-            echo "Primary legion container already exists, continuing\n";
+            echo "Primary legion container already exists, proceeding\n";
         } else {
             $moduleDir = dirname(__FILE__) . '/..';
 
@@ -52,7 +52,7 @@ class HostHelper
         }
     }
     
-    private function runTests(): void
+    protected function runTests(): void
     {
         $argv = $_SERVER['argv'];
         if (count($argv) < 2) {
