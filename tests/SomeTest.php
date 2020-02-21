@@ -6,9 +6,9 @@ use PHPUnit_Framework_TestCase;
 
 class SomeTest extends PHPUnit_Framework_TestCase
 {
-    public function myTest()
+    public function testSomething()
     {
-        echo __FILE__ . "\n";
+        echo __FILE__ . " **\n";
         $this->assertTrue(true);
     }
 }
