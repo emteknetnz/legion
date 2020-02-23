@@ -2,7 +2,7 @@
 
 namespace Emteknetnz\Legion;
 
-class PhpUnitTestResultParser
+class PhpUnitTestOutputParser
 {
     protected $parsedTestOutputs = [];
 

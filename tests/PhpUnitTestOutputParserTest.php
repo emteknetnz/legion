@@ -2,14 +2,14 @@
 
 namespace Emteknetnz\Legion\Tests;
 
-use Emteknetnz\Legion\PhpUnitTestResultParser;
+use Emteknetnz\Legion\PhpUnitTestOutputParser;
 use PHPUnit_Framework_TestCase;
 
-class PhpUnitTestResultParserTest extends PHPUnit_Framework_TestCase
+class PhpUnitTestOutputParserTest extends PHPUnit_Framework_TestCase
 {
     public function testParseTestResult()
     {
-        $parser = new PhpUnitTestResultParser();
+        $parser = new PhpUnitTestOutputParser();
         $testResults = [
             "OK (1 test, 1 assertion)",
             "OK (2 tests, 4 assertions)",
@@ -36,7 +36,7 @@ class PhpUnitTestResultParserTest extends PHPUnit_Framework_TestCase
 
     public function testParseTestOutput()
     {
-        $parser = new PhpUnitTestResultParser();
+        $parser = new PhpUnitTestOutputParser();
         $testOutput = file_get_contents(__DIR__ . '/fixtures/testOutputOne.txt');
         $expected = file_get_contents(__DIR__ . '/fixtures/testOutputOneExpected.txt');
         $actual = $parser->parseTestOutput($testOutput);
@@ -45,13 +45,13 @@ class PhpUnitTestResultParserTest extends PHPUnit_Framework_TestCase
 
     public function testParseTestOutputFileAndGetFormattedOutput()
     {
-        $parser = new PhpUnitTestResultParser();
+        $parser = new PhpUnitTestOutputParser();
         $parser->parseTestOutputFile(__DIR__ . '/fixtures/testOutputOne.txt');
         $parser->parseTestOutputFile(__DIR__ . '/fixtures/testOutputTwo.txt');
         $expected = file_get_contents(__DIR__ . '/fixtures/testGetFormattedOutputExpected.txt');
         $actual = $parser->getFormattedOutput();
-        file_put_contents('testresults/expected.txt', $expected);
-        file_put_contents('testresults/actual.txt', $actual);
+        file_put_contents(__DIR__ . '/../testresults/expected.txt', $expected);
+        file_put_contents(__DIR__ . '/../testresults/actual.txt', $actual);
         $this->assertEquals($expected, $actual);
     }
 }

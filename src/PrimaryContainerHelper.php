@@ -42,44 +42,42 @@ class PrimaryContainerHelper
         return $argv[1];
     }
 
+    /**
+     * Will spin up a new webserver_secondary that will be removed after phpunit is run from inside of it
+     * TODO: return an array of container ID's and pass that to waitForTestsToComplete()
+     */
     protected function runTestsInsideSecondaryContainers(
         string $testDir,
         array $funcNames,
         string $moduleDir,
         string $logDir
     ): void {
-        // TODO: return an array of container ID's and pass that to waitForTestsToComplete()
         foreach ($funcNames as $funcName) {
             echo "Creating container for $funcName\n";
-        
-            // this will spin up a new webserver_secondary that will be removed after phpunit
-            // is run from inside of it
-        
+
+            // the following will run inside primary webserver container with a pwd of /var/www/html
+            shell_exec("docker-compose -f $moduleDir/docker-compose-secondary.yml run " .
+                "--name myphpunit-$funcName -d --no-deps webserver_service_secondary " .
+                "bash -c 'vendor/bin/phpunit --filter=$funcName $testDir > $logDir/$funcName.txt 2>&1'");
+
             // --no-deps
             // - will use the existing legion_shared_database container, and create a tmp_database within in
             // - (previously when trying to use _a and _b databases, it would just use the _a database)
-            // - doesn't show any warnings
-            // - best performance for spinning up database containers
-            // - shoudl be fine for silverstripe phpunit since it will create tmp databases
+            // - doesn't show any warnings + best performance for spinning up database containers
+            // - fine for silverstripe phpunit as it creates tmp databases
         
             // (omit --no-deps)
             // - Initially will say Creating legion_b_database legion_b_database
             // - The next test will then say 'Starting legion_b_database, though I think using the one
             // currently being used by the first test
             // - Will show anooying message WARNING: Found orphan containers (legion_a_webserver, legion_a_database)
-            //   for this project
-            // - Slower performance
-        
-            // the following will run inside container A with a pwd of /var/www/html
-            shell_exec("docker-compose -f $moduleDir/docker-compose-secondary.yml run " .
-                "--name myphpunit-$funcName -d --no-deps webserver_service_secondary " .
-                "bash -c 'vendor/bin/phpunit --filter=$funcName $testDir > $logDir/$funcName.txt 2>&1'");
+            // for this project.  Also just has slower performance
         }
     }
 
     protected function waitForTestsToComplete(): void
     {
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 30; $i++) {
             $s = shell_exec('docker ps');
             if (preg_match('%myphpunit\-%', $s)) {
                 echo "Waiting for tests to complete ...\n";
@@ -90,6 +88,7 @@ class PrimaryContainerHelper
         }
     }
 
+    // TODO: rename $logDir to something more descriptive (it's not actually logs, it's testOutput)
     protected function createLogDir(string $logDir): void
     {
         shell_exec("rm -rf $logDir && mkdir $logDir");
@@ -98,6 +97,8 @@ class PrimaryContainerHelper
     protected function getTestFunctionNames(string $testDir): array
     {
         // TODO: hardcoded
+        // TODO: change return to path relative to testDir - [$path][$funcName]
+        // TODO: unit test
         $s = file_get_contents("$testDir/MyTest.php");
         preg_match_all('%function (test[^\( ]*)%', $s, $m);
         return $m[1];
@@ -114,7 +115,7 @@ class PrimaryContainerHelper
 
     protected function parseTestOutputs(string $logDir): void
     {
-        $parser = new PhpUnitTestResultParser();
+        $parser = new PhpUnitTestOutputParser();
         foreach (scandir($logDir) as $filename) {
             if (!preg_match('%^test.*?\.txt$%', $filename)) {
                 continue;
