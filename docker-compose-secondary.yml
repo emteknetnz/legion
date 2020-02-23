@@ -1,13 +1,13 @@
 version: "3"
 
 services:
-  webserver_service_b:
+  webserver_service_secondary:
     build: 
       context: ./dockerfiles/webserver
-    container_name: 'webserver_name_b'
+    container_name: 'webserver_name_secondary'
     restart: 'no'
     links: 
-      - database_service_ab
+      - database_service_shared
     volumes: 
       # These are shared from Host to B, not from A to B
       # I don't beleive it's because of docker.sock, I think it's just how things are
@@ -17,13 +17,14 @@ services:
       - /tmp:/tmp
     command: 
       # this will be run by sh with a pwd of /var/www/html
-      - vendor/emteknetnz/legion/commands/script-b.sh
-  database_service_ab:  
+      - vendor/emteknetnz/legion/commands/script-secondary.sh
+  # this is shared with the primary container
+  database_service_shared:
     build: ./dockerfiles/database
-    container_name: 'database_name_ab'
+    container_name: 'database_name_shared'
     restart: 'no'
     environment:
       MYSQL_ROOT_PASSWORD: root
 
-# start containerphp
-# docker-compose -f vendor/emteknetnz/legion/docker-compose-b.yml up
+# start container
+# docker-compose -f vendor/emteknetnz/legion/docker-compose-secondary.yml up

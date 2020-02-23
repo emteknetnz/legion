@@ -32,20 +32,20 @@ class HostHelper
     protected function createPrimaryContainer(): void
     {
         // current limitation is only one instance of legion on a host machine at once
-        $containerAExists = !is_null(shell_exec('docker ps -q --filter "name=webserver_name_a"'));
+        $containerAExists = !is_null(shell_exec('docker ps -q --filter "name=webserver_name_primary"'));
 
         if ($containerAExists) {
-            echo "Primary legion container already exists, proceeding\n";
+            echo "Primary legion docker container already exists, proceeding\n";
         } else {
             $moduleDir = __DIR__ . '/..';
 
             // up -d is pretty nice here,  it will spin it up the container detached, though
             // it will still wait for it to complete before going to the next line of php
-            echo "Spinning up primary legion container, this may take a while\n";
-            shell_exec("docker-compose -f $moduleDir/docker-compose-a.yml up -d");
+            echo "Spinning up primary legion docker container, this may take a while\n";
+            shell_exec("docker-compose -f $moduleDir/docker-compose-primary.yml up -d");
             echo "Container created\n";
             
-            $containerAID = trim(shell_exec('docker ps -q --filter "name=webserver_name_a"'));
+            $containerAID = trim(shell_exec('docker ps -q --filter "name=webserver_name_primary"'));
             echo "Running dev/build flush=1 in container\n";
             shell_exec("docker exec $containerAID bash -c 'vendor/bin/sake dev/build flush=1'");
             echo "dev/build flush=1 complete\n";
@@ -60,7 +60,7 @@ class HostHelper
             die;
         }
         $testDir = $argv[1];
-        $containerAID = trim(shell_exec('docker ps -q --filter "name=webserver_name_a"'));
+        $containerAID = trim(shell_exec('docker ps -q --filter "name=webserver_name_primary"'));
         $command = "php vendor/emteknetnz/legion/primarycontainer.php $testDir";
         echo shell_exec("docker exec $containerAID bash -c '$command'");
     }

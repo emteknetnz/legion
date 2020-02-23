@@ -27,7 +27,7 @@ class PrimaryContainerHelper
     protected function checkIsInsideDocker(): void
     {
         if (!file_exists('/home/is_legion_docker.txt')) {
-            echo "This file should only be run from within docker container_a\n";
+            echo "This file should only be run from within the primary docker container_\n";
             die;
         }
     }
@@ -52,11 +52,12 @@ class PrimaryContainerHelper
         foreach ($funcNames as $funcName) {
             echo "Creating container for $funcName\n";
         
-            // this will spin up a new webserver_b that will be removed after phpunit
+            // this will spin up a new webserver_secondary that will be removed after phpunit
             // is run from inside of it
         
             // --no-deps
-            // - will use the existing legion_a_database (instead of legion_b_database)
+            // - will use the existing legion_shared_database container, and create a tmp_database within in
+            // - (previously when trying to use _a and _b databases, it would just use the _a database)
             // - doesn't show any warnings
             // - best performance for spinning up database containers
             // - shoudl be fine for silverstripe phpunit since it will create tmp databases
@@ -70,8 +71,8 @@ class PrimaryContainerHelper
             // - Slower performance
         
             // the following will run inside container A with a pwd of /var/www/html
-            shell_exec("docker-compose -f $moduleDir/docker-compose-b.yml run " .
-                "--name myphpunit-$funcName -d --no-deps webserver_service_b " .
+            shell_exec("docker-compose -f $moduleDir/docker-compose-secondary.yml run " .
+                "--name myphpunit-$funcName -d --no-deps webserver_service_secondary " .
                 "bash -c 'vendor/bin/phpunit --filter=$funcName $testDir > $logDir/$funcName.txt 2>&1'");
         }
     }

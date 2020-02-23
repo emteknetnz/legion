@@ -1,16 +1,15 @@
 version: "3"
 
 services:
-  webserver_service_a:
+  webserver_service_primary:
     build: 
       context: ./dockerfiles/webserver
-    container_name: 'webserver_name_a'
+    container_name: 'webserver_name_primary'
     restart: 'no'
     ports:
      - "1080:80"
-#     - "1443:443"
     links: 
-      - database_service_ab
+      - database_service_shared
     volumes: 
       - ../../../:/var/www/html
       - ./volumes/vhosts:/etc/apache2/sites-enabled
@@ -18,23 +17,22 @@ services:
       - /tmp:/tmp
     command:
       # this will be run by sh with a pwd of /var/www/html
-      - vendor/emteknetnz/legion/commands/script-a.sh
-  database_service_ab:
+      - vendor/emteknetnz/legion/commands/script-primary.sh
+  # this is shared with the secondary containers
+  database_service_shared:
     build: ./dockerfiles/database
-    container_name: 'database_name_ab'
+    container_name: 'database_name_shared'
     restart: 'no'
-#    ports:
-#      - "13306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
 
 # start container
-# docker-compose -f vendor/emteknetnz/legion/docker-compose-a.yml up
+# docker-compose -f vendor/emteknetnz/legion/docker-compose-primary.yml up
 
 # ssh in to webserver
-# docker exec -it $(docker ps -q --filter "name=webserver_name_a") bash
+# docker exec -it $(docker ps -q --filter "name=webserver_name_primary") bash
 
 # connect to mysql from websever
-# mysql -uroot -proot -h database
+# mysql -uroot -proot -h database_service_shared
 
 # TODO: once this thing is stable, save it as an image and host on docker hub
