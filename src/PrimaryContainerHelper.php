@@ -97,8 +97,11 @@ class PrimaryContainerHelper
     protected function getTestFunctionNames(string $testDir): array
     {
         // TODO: hardcoded
+        // TODO: do the other TODO in this file to use container ID instead of funcName as container ID
         // TODO: change return to path relative to testDir - [$path][$funcName]
         // TODO: unit test
+        // should do a recursive file scan and find anything that 'extends <phpunittestcase>|SapphireTest|FunctionalTest'
+        // then, for each file, should find 'function test' (using regex below)
         $s = file_get_contents("$testDir/MyTest.php");
         preg_match_all('%function (test[^\( ]*)%', $s, $m);
         return $m[1];
