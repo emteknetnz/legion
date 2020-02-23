@@ -7,7 +7,7 @@ use PHPUnit_Framework_TestCase;
 
 class PhpUnitTestResultParserTest extends PHPUnit_Framework_TestCase
 {
-    public function testParseTestResult() 
+    public function testParseTestResult()
     {
         $parser = new PhpUnitTestResultParser();
         $testResults = [
