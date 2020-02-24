@@ -12,15 +12,15 @@ class PrimaryContainerHelper
         $specifiedTestDir = $this->getSpecifiedTestDir();
         $baseDir = __DIR__ . "/../../../..";
         $testDir = "$baseDir/" . $specifiedTestDir;
-        $logDir = __DIR__ . '/../testresults';
+        $testOutputDir = __DIR__ . '/../testresults';
         $moduleDir = __DIR__ . '/..';
         $funcNames = $this->getTestFunctionNames($testDir);
         
-        $this->createLogDir($logDir);
-        $this->runTestsInsideSecondaryContainers($testDir, $funcNames, $moduleDir, $logDir);
+        $this->createTestOutputDir($testOutputDir);
+        $this->runTestsInsideSecondaryContainers($testDir, $funcNames, $moduleDir, $testOutputDir);
         $this->waitForTestsToComplete();
         $this->removeSecondaryContainers($funcNames);
-        $this->parseTestOutputs($logDir);
+        $this->parseTestOutputs($testOutputDir);
         $this->echoExecutionTime($timeStart);
     }
 
@@ -50,7 +50,7 @@ class PrimaryContainerHelper
         string $testDir,
         array $funcNames,
         string $moduleDir,
-        string $logDir
+        string $testOutputDir
     ): void {
         foreach ($funcNames as $funcName) {
             echo "Creating container for $funcName\n";
@@ -58,7 +58,7 @@ class PrimaryContainerHelper
             // the following will run inside primary webserver container with a pwd of /var/www/html
             shell_exec("docker-compose -f $moduleDir/docker-compose-secondary.yml run " .
                 "--name myphpunit-$funcName -d --no-deps webserver_service_secondary " .
-                "bash -c 'vendor/bin/phpunit --filter=$funcName $testDir > $logDir/$funcName.txt 2>&1'");
+                "bash -c 'vendor/bin/phpunit --filter=$funcName $testDir > $testOutputDir/$funcName.txt 2>&1'");
 
             // --no-deps
             // - will use the existing legion_shared_database container, and create a tmp_database within in
@@ -88,10 +88,10 @@ class PrimaryContainerHelper
         }
     }
 
-    // TODO: rename $logDir to something more descriptive (it's not actually logs, it's testOutput)
-    protected function createLogDir(string $logDir): void
+    // TODO: rename $testOutputDir to something more descriptive (it's not actually logs, it's testOutput)
+    protected function createTestOutputDir(string $testOutputDir): void
     {
-        shell_exec("rm -rf $logDir && mkdir $logDir");
+        shell_exec("rm -rf $testOutputDir && mkdir $testOutputDir");
     }
 
     protected function getTestFunctionNames(string $testDir): array
@@ -116,14 +116,14 @@ class PrimaryContainerHelper
         }
     }
 
-    protected function parseTestOutputs(string $logDir): void
+    protected function parseTestOutputs(string $testOutputDir): void
     {
         $parser = new PhpUnitTestOutputParser();
-        foreach (scandir($logDir) as $filename) {
+        foreach (scandir($testOutputDir) as $filename) {
             if (!preg_match('%^test.*?\.txt$%', $filename)) {
                 continue;
             }
-            $filepath = "$logDir/$filename";
+            $filepath = "$testOutputDir/$filename";
             $parser->parseTestOutputFile($filepath);
         }
         echo $parser->getFormattedOutput();
