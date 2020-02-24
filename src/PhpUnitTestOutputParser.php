@@ -2,6 +2,8 @@
 
 namespace Emteknetnz\Legion;
 
+use Exception;
+
 class PhpUnitTestOutputParser
 {
     protected $parsedTestOutputs = [];
@@ -30,6 +32,12 @@ class PhpUnitTestOutputParser
         $testOutput = str_replace("\n\n", "\n", $testOutput);
         $rx = '%(?s)((OK|FAILURE).+?[\.\)])%';
         preg_match($rx, $testOutput, $m);
+        // this isn't ideal, though keep it for not to help debug this sporadic error
+        // TODO: remove if I haven't seen this in a long while
+        if (!isset($m[1])) {
+            var_dump($testOutput);
+            throw new Exception('COULD NOT PARSE TEST OUTPUT');
+        }
         $testResult = $m[1];
         $testOutput = preg_replace($rx, '', $testOutput);
         $testNumbers = $this->parseTestResult($testResult);

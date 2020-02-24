@@ -17,9 +17,10 @@ class PrimaryContainerHelper
         $funcNames = $this->getTestFunctionNames($testDir);
         
         $this->createTestOutputDir($testOutputDir);
-        $this->runTestsInsideSecondaryContainers($testDir, $funcNames, $moduleDir, $testOutputDir);
-        $this->waitForTestsToComplete();
-        $this->removeSecondaryContainers($funcNames);
+        $args = [$testDir, $funcNames, $moduleDir, $testOutputDir];
+        $secondaryContainerNames = $this->runTestsInsideSecondaryContainers(...$args);
+        $this->waitForTestsToComplete($secondaryContainerNames);
+        $this->removeSecondaryContainers($secondaryContainerNames);
         $this->parseTestOutputs($testOutputDir);
         $this->echoExecutionTime($timeStart);
     }
@@ -51,14 +52,16 @@ class PrimaryContainerHelper
         array $funcNames,
         string $moduleDir,
         string $testOutputDir
-    ): void {
+    ): array {
+        $secondaryContainerNames = [];
         foreach ($funcNames as $funcName) {
             echo "Creating container for $funcName\n";
 
             // the following will run inside primary webserver container with a pwd of /var/www/html
-            shell_exec("docker-compose -f $moduleDir/docker-compose-secondary.yml run " .
-                "--name myphpunit-$funcName -d --no-deps webserver_service_secondary " .
-                "bash -c 'vendor/bin/phpunit --filter=$funcName $testDir > $testOutputDir/$funcName.txt 2>&1'");
+            $command = "docker-compose -f $moduleDir/docker-compose-secondary.yml run" .
+            " --name myphpunit-$funcName -d --no-deps webserver_service_secondary" .
+            " bash -c 'vendor/bin/phpunit --filter=$funcName $testDir > $testOutputDir/$funcName.txt 2>&1'";
+            $secondaryContainerNames[] = shell_exec($command);
 
             // --no-deps
             // - will use the existing legion_shared_database container, and create a tmp_database within in
@@ -73,22 +76,25 @@ class PrimaryContainerHelper
             // - Will show anooying message WARNING: Found orphan containers (legion_a_webserver, legion_a_database)
             // for this project.  Also just has slower performance
         }
+        return $secondaryContainerNames;
     }
 
-    protected function waitForTestsToComplete(): void
+    protected function waitForTestsToComplete(array $secondaryContainerNames): void
     {
         for ($i = 0; $i < 30; $i++) {
             $s = shell_exec('docker ps');
-            if (preg_match('%myphpunit\-%', $s)) {
-                echo "Waiting for tests to complete ...\n";
-                sleep(1);
-                continue;
+            foreach ($secondaryContainerNames as $secondaryContainerName) {
+                $secondaryContainerName = str_replace('-', '\-', $secondaryContainerName);
+                if (preg_match("%$secondaryContainerName%", $s)) {
+                    echo "Waiting for tests to complete ...\n";
+                    sleep(1);
+                    continue;
+                }
             }
             break;
         }
     }
 
-    // TODO: rename $testOutputDir to something more descriptive (it's not actually logs, it's testOutput)
     protected function createTestOutputDir(string $testOutputDir): void
     {
         shell_exec("rm -rf $testOutputDir && mkdir $testOutputDir");
@@ -97,22 +103,22 @@ class PrimaryContainerHelper
     protected function getTestFunctionNames(string $testDir): array
     {
         // TODO: hardcoded
-        // TODO: do the other TODO in this file to use container ID instead of funcName as container ID
         // TODO: change return to path relative to testDir - [$path][$funcName]
         // TODO: unit test
-        // should do a recursive file scan and find anything that 'extends <phpunittestcase>|SapphireTest|FunctionalTest'
+        // should do a recursive file scan and find anything that
+        //  'extends <phpunittestcase>|SapphireTest|FunctionalTest'
         // then, for each file, should find 'function test' (using regex below)
         $s = file_get_contents("$testDir/MyTest.php");
         preg_match_all('%function (test[^\( ]*)%', $s, $m);
         return $m[1];
     }
 
-    protected function removeSecondaryContainers(array $funcNames): void
+    protected function removeSecondaryContainers(array $secondaryContainerNames): void
     {
         // remove containers (cannot use --rm with -d in docker-compose run)
-        foreach ($funcNames as $funcName) {
-            echo "Removing docker container myphpunit-$funcName\n";
-            shell_exec("docker rm myphpunit-$funcName");
+        foreach ($secondaryContainerNames as $secondaryContainerName) {
+            echo "Removing docker container $secondaryContainerName\n";
+            shell_exec("docker rm $secondaryContainerName");
         }
     }
 
