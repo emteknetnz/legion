@@ -19,10 +19,9 @@ class PrimaryContainerHelper
         $testOutputDir = __DIR__ . $up . $s . 'testresults';
         $moduleDir = __DIR__ . $up;
         $scanner = new UnitTestScanner();
-        $funcNames = $scanner->findUnitTests($testDir);
-
+        $unitTestArr = $scanner->findUnitTests($testDir);
         $this->createTestOutputDir($testOutputDir);
-        $args = [$testDir, $funcNames, $moduleDir, $testOutputDir];
+        $args = [$testDir, $unitTestArr, $moduleDir, $testOutputDir];
         $secondaryContainerNames = $this->runTestsInsideSecondaryContainers(...$args);
         $this->waitForTestsToComplete($secondaryContainerNames);
         $this->removeSecondaryContainers($secondaryContainerNames);
@@ -53,32 +52,37 @@ class PrimaryContainerHelper
      */
     protected function runTestsInsideSecondaryContainers(
         string $testDir,
-        array $funcNames,
+        array $unitTestArr,
         string $moduleDir,
         string $testOutputDir
     ): array {
         $secondaryContainerNames = [];
-        foreach ($funcNames as $funcName) {
-            echo "Creating container for $funcName\n";
+        foreach ($unitTestArr as $relativePath => $funcNames) {
+            // TODO: a little bit mad creating one container per one funcName
+            foreach ($funcNames as $funcName) {
+                $containerName = str_replace(DIRECTORY_SEPARATOR, '-', $relativePath) . $funcName;
+                $containerName = str_replace('.php', '_', $containerName);
+                echo "Creating container for $containerName\n";
 
-            // the following will run inside primary webserver container with a pwd of /var/www/html
-            $command = "docker-compose -f $moduleDir/docker-compose-secondary.yml run" .
-            " --name myphpunit-$funcName -d --no-deps webserver_service_secondary" .
-            " bash -c 'vendor/bin/phpunit --filter=$funcName $testDir > $testOutputDir/$funcName.txt 2>&1'";
-            $secondaryContainerNames[] = shell_exec($command);
+                // the following will run inside primary webserver container with a pwd of /var/www/html
+                $command = "docker-compose -f $moduleDir/docker-compose-secondary.yml run" .
+                " --name $containerName -d --no-deps webserver_service_secondary" .
+                " bash -c 'vendor/bin/phpunit --filter=$funcName $testDir > $testOutputDir/$containerName.txt 2>&1'";
+                $secondaryContainerNames[] = shell_exec($command);
 
-            // --no-deps
-            // - will use the existing legion_shared_database container, and create a tmp_database within in
-            // - (previously when trying to use _a and _b databases, it would just use the _a database)
-            // - doesn't show any warnings + best performance for spinning up database containers
-            // - fine for silverstripe phpunit as it creates tmp databases
-        
-            // (omit --no-deps)
-            // - Initially will say Creating legion_b_database legion_b_database
-            // - The next test will then say 'Starting legion_b_database, though I think using the one
-            // currently being used by the first test
-            // - Will show anooying message WARNING: Found orphan containers (legion_a_webserver, legion_a_database)
-            // for this project.  Also just has slower performance
+                // --no-deps
+                // - will use the existing legion_shared_database container, and create a tmp_database within in
+                // - (previously when trying to use _a and _b databases, it would just use the _a database)
+                // - doesn't show any warnings + best performance for spinning up database containers
+                // - fine for silverstripe phpunit as it creates tmp databases
+            
+                // (omit --no-deps)
+                // - Initially will say Creating legion_b_database legion_b_database
+                // - The next test will then say 'Starting legion_b_database, though I think using the one
+                // currently being used by the first test
+                // - Will show anooying message WARNING: Found orphan containers (legion_a_webserver, legion_a_database)
+                // for this project.  Also just has slower performance
+            }
         }
         return $secondaryContainerNames;
     }
@@ -117,7 +121,7 @@ class PrimaryContainerHelper
     {
         $parser = new PhpUnitTestOutputParser();
         foreach (scandir($testOutputDir) as $filename) {
-            if (!preg_match('%^test.*?\.txt$%', $filename)) {
+            if (pathinfo($filename, PATHINFO_EXTENSION) !== 'txt') {
                 continue;
             }
             $filepath = "$testOutputDir/$filename";
