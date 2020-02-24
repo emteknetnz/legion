@@ -32,6 +32,7 @@ class HostHelper
     protected function createPrimaryContainer(): void
     {
         // current limitation is only one instance of legion on a host machine at once
+        // TODO: rename to primary container all instances in this file
         $containerAExists = !is_null(shell_exec('docker ps -q --filter "name=webserver_name_primary"'));
 
         if ($containerAExists) {
@@ -59,7 +60,7 @@ class HostHelper
             echo "Please specify a test-directory i.e. vendor/bin/legion <test-dir>\n";
             die;
         }
-        $testDir = $argv[1];
+        $testDir = rtrim($argv[1], DIRECTORY_SEPARATOR);
         $containerAID = trim(shell_exec('docker ps -q --filter "name=webserver_name_primary"'));
         $command = "php vendor/emteknetnz/legion/primarycontainer.php $testDir";
         echo shell_exec("docker exec $containerAID bash -c '$command'");

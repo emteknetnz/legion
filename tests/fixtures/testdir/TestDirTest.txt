@@ -4,8 +4,23 @@ use PHPUnit_Framework_TestCase;
 
 class TestDirTest extends PHPUnit_Framework_TestCase
 {
+    public function setup()
+    {
+        echo $this->something();
+    }
+
     public function testOne()
     {
         $this->assertTrue(true);
+    }
+    
+    public function testTwo()
+    {
+        $this->assertTrue(true);
+    }
+
+    private function something()
+    {
+        return 'abc';
     }
 }

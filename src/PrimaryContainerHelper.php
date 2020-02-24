@@ -45,12 +45,11 @@ class PrimaryContainerHelper
             echo "Please specify a test directory\n";
             die;
         }
-        return $argv[1];
+        return rtrim($argv[1], DIRECTORY_SEPARATOR);
     }
 
     /**
      * Will spin up a new webserver_secondary that will be removed after phpunit is run from inside of it
-     * TODO: return an array of container ID's and pass that to waitForTestsToComplete()
      */
     protected function runTestsInsideSecondaryContainers(
         string $testDir,

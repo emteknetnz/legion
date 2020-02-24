@@ -9,12 +9,12 @@ class SubDirTest extends SapphireTest
         echo $this->something();
     }
 
-    public function testThree()
+    public function testFive()
     {
         $this->assertTrue(true);
     }
     
-    public function testFour()
+    public function testSix()
     {
         $this->assertTrue(true);
     }

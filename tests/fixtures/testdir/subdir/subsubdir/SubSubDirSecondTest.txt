@@ -9,18 +9,8 @@ class SubSubDirTest extends FunctionalTest
         echo $this->something();
     }
 
-    public function testSeven()
-    {
-        $this->assertTrue(true);
-    }
-    
-    public function testEight()
-    {
-        $this->assertTrue(true);
-    }
-
     private function something()
     {
-        return 'abc';
+        return 'This file contains no valid tests so should show in scan results';
     }
 }
