@@ -1,0 +1,11 @@
+<?php
+
+use SilverStripe\Dev\FunctionalTest;
+
+class SubSubDirTest extends FunctionalTest
+{
+    public function testOne()
+    {
+        $this->assertTrue(true);
+    }
+}

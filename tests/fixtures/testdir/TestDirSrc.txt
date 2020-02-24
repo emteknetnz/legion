@@ -1,0 +1,9 @@
+<?php
+
+class TestDirSrc
+{
+    public function __construct()
+    {
+        echo __FILE__;
+    }
+}

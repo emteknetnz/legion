@@ -1,0 +1,11 @@
+<?php
+
+use PHPUnit_Framework_TestCase;
+
+class TestDirTest extends PHPUnit_Framework_TestCase
+{
+    public function testOne()
+    {
+        $this->assertTrue(true);
+    }
+}

@@ -1,0 +1,11 @@
+<?php
+
+use SilverStripe\Dev\SapphireTest;
+
+class SubDirTest extends SapphireTest
+{
+    public function testOne()
+    {
+        $this->assertTrue(true);
+    }
+}

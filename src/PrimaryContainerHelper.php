@@ -2,6 +2,8 @@
 
 namespace Emteknetnz\Legion;
 
+use Emteknetnz\Legion\UnitTestScanner;
+
 class PrimaryContainerHelper
 {
     public function init(): void
@@ -14,8 +16,9 @@ class PrimaryContainerHelper
         $testDir = "$baseDir/" . $specifiedTestDir;
         $testOutputDir = __DIR__ . '/../testresults';
         $moduleDir = __DIR__ . '/..';
-        $funcNames = $this->getTestFunctionNames($testDir);
-        
+        $scanner = new UnitTestScanner();
+        $funcNames = $scanner->findUnitTests($testDir);
+
         $this->createTestOutputDir($testOutputDir);
         $args = [$testDir, $funcNames, $moduleDir, $testOutputDir];
         $secondaryContainerNames = $this->runTestsInsideSecondaryContainers(...$args);
@@ -98,19 +101,6 @@ class PrimaryContainerHelper
     protected function createTestOutputDir(string $testOutputDir): void
     {
         shell_exec("rm -rf $testOutputDir && mkdir $testOutputDir");
-    }
-
-    protected function getTestFunctionNames(string $testDir): array
-    {
-        // TODO: hardcoded
-        // TODO: change return to path relative to testDir - [$path][$funcName]
-        // TODO: unit test
-        // should do a recursive file scan and find anything that
-        //  'extends <phpunittestcase>|SapphireTest|FunctionalTest'
-        // then, for each file, should find 'function test' (using regex below)
-        $s = file_get_contents("$testDir/MyTest.php");
-        preg_match_all('%function (test[^\( ]*)%', $s, $m);
-        return $m[1];
     }
 
     protected function removeSecondaryContainers(array $secondaryContainerNames): void
