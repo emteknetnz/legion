@@ -10,8 +10,11 @@ class UnitTestScannerTest extends PHPUnit_Framework_TestCase
     public function testGetTestFunctionNames()
     {
         $scanner = new UnitTestScanner();
-        $testDir = __DIR__ . '/fixtures/testdir';
-        $expected = '';
+        $s = DIRECTORY_SEPARATOR;
+        $testDir = __DIR__ . $s . 'fixtures' . $s .'testdir';
+        $expected = [
+            ''
+        ];
         $actual = $scanner->findUnitTests($testDir, 'txt');
         $this->assertEquals($expected, $actual);
     }

@@ -12,10 +12,12 @@ class PrimaryContainerHelper
         $this->checkIsInsideDocker();
 
         $specifiedTestDir = $this->getSpecifiedTestDir();
-        $baseDir = __DIR__ . "/../../../..";
+        $s = DIRECTORY_SEPARATOR;
+        $up = $s . '..';
+        $baseDir = __DIR__ . $up . $up . $up . $up;
         $testDir = "$baseDir/" . $specifiedTestDir;
-        $testOutputDir = __DIR__ . '/../testresults';
-        $moduleDir = __DIR__ . '/..';
+        $testOutputDir = __DIR__ . $up . $s . 'testresults';
+        $moduleDir = __DIR__ . $up;
         $scanner = new UnitTestScanner();
         $funcNames = $scanner->findUnitTests($testDir);
 
