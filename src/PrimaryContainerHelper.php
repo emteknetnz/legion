@@ -58,31 +58,29 @@ class PrimaryContainerHelper
     ): array {
         $secondaryContainerNames = [];
         foreach ($unitTestArr as $relativePath => $funcNames) {
-            // TODO: a little bit mad creating one container per one funcName
-            foreach ($funcNames as $funcName) {
-                $containerName = str_replace(DIRECTORY_SEPARATOR, '-', $relativePath) . $funcName;
-                $containerName = str_replace('.php', '_', $containerName);
-                echo "Creating container for $containerName\n";
+            $containerName = str_replace(DIRECTORY_SEPARATOR, '-', $relativePath);
+            $containerName = str_replace('.php', '_', $containerName);
+            echo "Creating container for $containerName\n";
 
-                // the following will run inside primary webserver container with a pwd of /var/www/html
-                $command = "docker-compose -f $moduleDir/docker-compose-secondary.yml run" .
-                " --name $containerName -d --no-deps webserver_service_secondary" .
-                " bash -c 'vendor/bin/phpunit --filter=$funcName $testDir > $testOutputDir/$containerName.txt 2>&1'";
-                $secondaryContainerNames[] = shell_exec($command);
+            // the following will run inside primary webserver container with a pwd of /var/www/html
+            $filepath = $testDir . DIRECTORY_SEPARATOR . $relativePath;
+            $command = "docker-compose -f $moduleDir/docker-compose-secondary.yml run" .
+            " --name $containerName -d --no-deps webserver_service_secondary" .
+            " bash -c 'vendor/bin/phpunit $filepath > $testOutputDir/$containerName.txt 2>&1'";
+            $secondaryContainerNames[] = shell_exec($command);
 
-                // --no-deps
-                // - will use the existing legion_shared_database container, and create a tmp_database within in
-                // - (previously when trying to use _a and _b databases, it would just use the _a database)
-                // - doesn't show any warnings + best performance for spinning up database containers
-                // - fine for silverstripe phpunit as it creates tmp databases
-            
-                // (omit --no-deps)
-                // - Initially will say Creating legion_b_database legion_b_database
-                // - The next test will then say 'Starting legion_b_database, though I think using the one
-                // currently being used by the first test
-                // - Will show anooying message WARNING: Found orphan containers (legion_a_webserver, legion_a_database)
-                // for this project.  Also just has slower performance
-            }
+            // --no-deps
+            // - will use the existing legion_shared_database container, and create a tmp_database within in
+            // - (previously when trying to use _a and _b databases, it would just use the _a database)
+            // - doesn't show any warnings + best performance for spinning up database containers
+            // - fine for silverstripe phpunit as it creates tmp databases
+        
+            // (omit --no-deps)
+            // - Initially will say Creating legion_b_database legion_b_database
+            // - The next test will then say 'Starting legion_b_database, though I think using the one
+            // currently being used by the first test
+            // - Will show anooying message WARNING: Found orphan containers (legion_a_webserver, legion_a_database)
+            // for this project.  Also just has slower performance
         }
         return $secondaryContainerNames;
     }
