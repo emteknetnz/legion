@@ -27,7 +27,13 @@ class UnitTestScanner
                     continue;
                 }
                 $s = file_get_contents($filepath);
-                $rx = '% extends (PHPUnit_Framework_TestCase|SapphireTest|FunctionalTest)%';
+                $classes = [
+                    'SapphireTest',
+                    'FunctionalTest',
+                    'PHPUnit_Framework_TestCase',
+                    preg_quote('\PHPUnit_Framework_TestCase'),
+                ];
+                $rx = '% extends (' . implode('|', $classes) . ')%';
                 if (!preg_match($rx, $s)) {
                     continue;
                 }
