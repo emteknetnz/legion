@@ -3,6 +3,7 @@
 namespace Emteknetnz\Legion;
 
 use Emteknetnz\Legion\UnitTestScanner;
+use Exception;
 
 class PrimaryContainerHelper
 {
@@ -59,15 +60,24 @@ class PrimaryContainerHelper
         $secondaryContainerNames = [];
         foreach ($unitTestArr as $relativePath => $funcNames) {
             $containerName = str_replace(DIRECTORY_SEPARATOR, '-', $relativePath);
-            $containerName = str_replace('.php', '_', $containerName);
-            echo "Creating container for $containerName\n";
+            $containerName = str_replace('.php', '', $containerName);
 
+            // try removing container in-case it was left over from previous run that had an exception
+            $this->removeSecondaryContainer($containerName);
+
+            echo "Creating container for $containerName\n";
             // the following will run inside primary webserver container with a pwd of /var/www/html
             $filepath = $testDir . DIRECTORY_SEPARATOR . $relativePath;
-            $command = "docker-compose -f $moduleDir/docker-compose-secondary.yml run" .
+            $dockerComposeFile = $moduleDir . DIRECTORY_SEPARATOR . 'docker-compose-secondary.yml';
+            $command = "docker-compose -f $dockerComposeFile run" .
             " --name $containerName -d --no-deps webserver_service_secondary" .
             " bash -c 'vendor/bin/phpunit $filepath > $testOutputDir/$containerName.txt 2>&1'";
-            $secondaryContainerNames[] = shell_exec($command);
+            $secondaryContainerName = shell_exec($command);
+            if ($secondaryContainerName) {
+                $secondaryContainerNames[] = $secondaryContainerName;
+            } else {
+                throw new Exception("NULL secondaryContainerName for $relativePath");
+            }
 
             // --no-deps
             // - will use the existing legion_shared_database container, and create a tmp_database within in
@@ -106,17 +116,29 @@ class PrimaryContainerHelper
         shell_exec("rm -rf $testOutputDir && mkdir $testOutputDir");
     }
 
+    /**
+     * need to explicitly remove containers as cannot use --rm with -d in docker-compose run 
+    */
+    protected function removeSecondaryContainer(string $secondaryContainerName): void
+    {
+            echo "Removing docker container $secondaryContainerName\n";
+            if (shell_exec("docker ps -q --filter name=$secondaryContainerName")) {
+                shell_exec("docker stop $secondaryContainerName");
+                shell_exec("docker rm $secondaryContainerName");
+            }
+    }
+
     protected function removeSecondaryContainers(array $secondaryContainerNames): void
     {
-        // remove containers (cannot use --rm with -d in docker-compose run)
         foreach ($secondaryContainerNames as $secondaryContainerName) {
-            echo "Removing docker container $secondaryContainerName\n";
-            shell_exec("docker rm $secondaryContainerName");
+            $this->removeSecondaryContainer($secondaryContainerName);
         }
     }
 
     protected function parseTestOutputs(string $testOutputDir): void
     {
+        echo "Sleeping to ensure file system up to date\n";
+        sleep(1);
         $parser = new PhpUnitTestOutputParser();
         foreach (scandir($testOutputDir) as $filename) {
             if (pathinfo($filename, PATHINFO_EXTENSION) !== 'txt') {

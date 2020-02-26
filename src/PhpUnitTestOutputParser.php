@@ -37,7 +37,7 @@ class PhpUnitTestOutputParser
         // this isn't ideal, though keep it for not to help debug this sporadic error
         // TODO: remove if I haven't seen this in a long while
         if (!isset($m[1])) {
-            echo "\n=== testOuput:\n";
+            echo "\n=== testOutput:\n";
             var_dump($testOutput);
             throw new Exception('^ COULD NOT PARSE TEST OUTPUT - var_dump($testOutput) above');
         }

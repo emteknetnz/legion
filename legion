@@ -6,6 +6,11 @@
 
 use Emteknetnz\Legion\HostHelper;
 
+// TODO: need to ensure that
+// a) vendor/silverstripe/framework/tests/bootstrap.php is called
+// b) From host I can run vendor/bin/legion app/src flush=1 AND it will flush inside the primary container
+//    same as vendor/bin/phpunit app/src flush=1 will flush on host, as it will used the phpunit.xml.dist in
+//    the project root: <phpunit bootstrap="vendor/silverstripe/framework/tests/bootstrap.php" colors="true">
 require 'src/autoload.php';
 
 $hostHelper = new HostHelper();
