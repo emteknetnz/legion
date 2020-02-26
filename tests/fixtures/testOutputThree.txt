@@ -1,0 +1,15 @@
+PHPUnit 5.7.27 by Sebastian Bergmann and contributors.
+
+E....                                                               5 / 5 (100%)
+
+Time: 1.19 seconds, Memory: 18.00MB
+
+There was 1 error:
+
+1) SilverStripe\Admin\Tests\CMSMenuTest::testBasicMenuHandling
+Undefined index: SilverStripe-Admin-Tests-CMSMenuTest-LeftAndMainController
+
+/var/www/html/vendor/silverstripe/admin/tests/php/CMSMenuTest.php:26
+
+ERRORS!
+Tests: 5, Assertions: 53, Errors: 1.

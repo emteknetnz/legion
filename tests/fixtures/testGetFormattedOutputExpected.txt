@@ -4,4 +4,9 @@ There was 1 failure:
 1) MyTest::testSeven
 Failed asserting that false is true.
 /var/www/html/app/src/MyTest.php:61
-Tests: 3, Assertions: 5, Failures: 1, Skipped: 0, Incomplete: 0
+E....                                                               5 / 5 (100%)
+There was 1 error:
+1) SilverStripe\Admin\Tests\CMSMenuTest::testBasicMenuHandling
+Undefined index: SilverStripe-Admin-Tests-CMSMenuTest-LeftAndMainController
+/var/www/html/vendor/silverstripe/admin/tests/php/CMSMenuTest.php:26
+Tests: 8, Assertions: 58, Failures: 1, Skipped: 0, Incomplete: 0

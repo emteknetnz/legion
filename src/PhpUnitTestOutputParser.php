@@ -18,6 +18,8 @@ class PhpUnitTestOutputParser
 
     protected $incomplete = 0;
 
+    protected $errors = 0;
+
     public function parseTestOutputFile(string $filepath): void
     {
         $testOutput = file_get_contents($filepath);
@@ -30,13 +32,14 @@ class PhpUnitTestOutputParser
         $testOutput = preg_replace('%PHPUnit .+? by Sebastian Bergmann[^\n]*%', '', $testOutput);
         $testOutput = preg_replace("%\nTime:.+?B\n%", '', $testOutput);
         $testOutput = str_replace("\n\n", "\n", $testOutput);
-        $rx = '%(?s)((OK|FAILURE).+?[\.\)])%';
+        $rx = '%(?s)((OK|FAILURE|ERROR).+?[\.\)])%';
         preg_match($rx, $testOutput, $m);
         // this isn't ideal, though keep it for not to help debug this sporadic error
         // TODO: remove if I haven't seen this in a long while
         if (!isset($m[1])) {
+            echo "\n=== testOuput:\n";
             var_dump($testOutput);
-            throw new Exception('COULD NOT PARSE TEST OUTPUT');
+            throw new Exception('^ COULD NOT PARSE TEST OUTPUT - var_dump($testOutput) above');
         }
         $testResult = $m[1];
         $testOutput = preg_replace($rx, '', $testOutput);
@@ -52,6 +55,7 @@ class PhpUnitTestOutputParser
         $this->failures += $testNumbers['failures'];
         $this->skipped += $testNumbers['skipped'];
         $this->incomplete += $testNumbers['incomplete'];
+        $this->errors += $testNumbers['errors'];
     }
 
     /**
@@ -65,6 +69,7 @@ class PhpUnitTestOutputParser
             'failures' => 0,
             'skipped' => 0,
             'incomplete' => 0,
+            'errors' => 0,
         ];
         $s = $testResult;
         if (preg_match('%^OK \(([0-9]+) tests?, ([0-9]+) assertions?\)$%', $s, $m)) {
@@ -73,8 +78,9 @@ class PhpUnitTestOutputParser
         } else {
             $s = str_replace("OK, but incomplete, skipped, or risky tests!\n", '', $s);
             $s = str_replace("FAILURES!\n", '', $s);
+            $s = str_replace("ERRORS!\n", '', $s);
             $s = preg_replace('%\.$%', '', $s);
-            // Tests: 5, Assertions: 6, Failures: 1, Skipped: 1, Incomplete: 1
+            // Tests: 5, Assertions: 6, Failures: 1, Skipped: 1, Incomplete: 1, Errors: 1
             foreach (preg_split('%, %', $s) as $fr) {
                 $kv = preg_split('%: %', $fr);
                 $k = strtolower($kv[0]);
