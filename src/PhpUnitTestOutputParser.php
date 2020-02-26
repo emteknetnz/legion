@@ -98,7 +98,8 @@ class PhpUnitTestOutputParser
             "Assertions: " . $this->assertions,
             "Failures: " . $this->failures,
             "Skipped: " . $this->skipped,
-            "Incomplete: " . $this->incomplete
+            "Incomplete: " . $this->incomplete,
+            "Errors: " . $this->errors
         ]) . "\n";
         return $output;
     }
