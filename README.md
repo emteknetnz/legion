@@ -23,3 +23,4 @@ The /tmp folder is also shared between host, container A and container Bs.  This
 Host needs to share /tmp because container A and container Bs are siblings volume mounts won't work easily out of the box.  Also, possibly it would be better if it wasn't the /tmp folder shared, instead should maybe use /silverstripe-cache/ ?
 
 .
+.
